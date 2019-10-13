@@ -1,0 +1,49 @@
+
+@import "https://fonts.googleapis.com/icon?family=Material+Icons";
+@import "https://fonts.googleapis.com/css?family=Roboto|Roboto+Condensed&display=swap";
+
+/* Color Variables
+ ------------------*/
+@import '~materialize-css/sass/components/color-variables';
+
+/* Variables
+ ------------*/
+@import '~materialize-css/sass/components/variables';
+// Badges
+$badge-bg-color: violet;
+// Buttons
+//------------
+/* Shared */
+$button-radius: 3px;
+$button-height: 46px;
+$button-padding: 0 26px;
+$button-font-size: 16px;
+/* Primary Buttons */
+$button-primary-background: #f44444;
+$button-primary-color: #fff;
+
+// Navigation Bar
+$navbar-font-color: #000;
+$navbar-font-size: 16px;
+
+// Typography
+$h1-fontsize: 3.56rem;
+$h2-fontsize: 2.92rem;
+
+
+/* Normalize
+ ------------*/
+@import '~materialize-css/sass/components/normalize';
+
+/* Components
+  ------------*/
+@import '~materialize-css/sass/components/global';
+@import '~materialize-css/sass/components/badges';
+@import '~materialize-css/sass/components/grid';
+@import '~materialize-css/sass/components/navbar';
+@import '~materialize-css/sass/components/typography';
+@import '~materialize-css/sass/components/buttons';
+
+/* Custom
+ ---------*/
+@import './custom';
