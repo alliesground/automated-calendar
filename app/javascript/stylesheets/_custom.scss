@@ -54,7 +54,16 @@ h1, h2 {
 }
 
 // Paddings
-.py-lg-6 {
-  padding: 6rem 0 !important;
+@media #{$small-and-down} {
+  .py-sm-3 {
+    padding: 3rem 0 !important;
+  }
 }
+
+@media #{$medium-and-up} {
+  .py-md-6 {
+    padding: 6rem 0 !important;
+  }
+}
+
 
