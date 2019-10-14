@@ -45,15 +45,21 @@ nav {
 }
 
 // Typography
-h1, h2 {
-  p.sub-title {
-    color: grey;
-    font-size: 14px;
-    line-height: 1.5;
+html{
+  @media only screen and (min-width: 0) {
+    font-size: 15px;
+  }
+
+  @media only screen and (min-width: $medium-screen) {
+    font-size: 15.5px;
+  }
+
+  @media only screen and (min-width: $large-screen) {
+    font-size: 16px;
   }
 }
 
-// Paddings
+// Padding Classes
 @media #{$small-and-down} {
   .py-sm-3 {
     padding: 3rem 0 !important;
