@@ -1,0 +1,22 @@
+%nav
+  .container
+    .nav-wrapper
+      %a.brand-logo{href: '#'}
+        Logo
+      %ul.right.hide-on-med-and-down#nav-mobile
+        %li
+          %a{href: '#'} Products
+        %li 
+          %a{href: '#'} Pricing
+        %li 
+          %a{href: '#'} About
+        %li 
+          %a{href: '#'} FAQ
+        %li
+          - if user_signed_in?
+            = link_to 'Logout', destroy_user_session_path, method: :delete
+          - else
+            = link_to 'Login', new_user_session_path
+        %li
+          %a.btn.btn-primary
+            Create a logo
