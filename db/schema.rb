@@ -10,14 +10,16 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema.define(version: 2019_10_21_113505) do
+ActiveRecord::Schema.define(version: 2019_10_21_125032) do
 
   # These are extensions that must be enabled in order to support this database
   enable_extension "hstore"
   enable_extension "plpgsql"
 
-  create_table "google_configs", force: :cascade do |t|
+  create_table "google_calendar_configs", force: :cascade do |t|
     t.hstore "authorization"
+    t.bigint "user_id", null: false
+    t.index ["user_id"], name: "index_google_calendar_configs_on_user_id"
   end
 
   create_table "users", force: :cascade do |t|
@@ -32,4 +34,5 @@ ActiveRecord::Schema.define(version: 2019_10_21_113505) do
     t.index ["reset_password_token"], name: "index_users_on_reset_password_token", unique: true
   end
 
+  add_foreign_key "google_calendar_configs", "users"
 end
