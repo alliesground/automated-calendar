@@ -1,3 +1,12 @@
+:javascript
+  $(function() {
+    $('#google-cal-config :checkbox').change(function() {
+      if($(this).is(':checked')) {
+        $(this).closest('form').submit()
+      }
+    })
+  })
+
 .container.content-holder
   .row
     .col.s8
@@ -7,10 +16,11 @@
       %p
         Would you like to receive event updates to your Google Calendar?
     .col.s4
-      .switch.right-align#google-cal-config
-        %label
-          No
-          %input{type: "checkbox"}
-          %span.lever
-          Yes
+      = form_tag google_calendar_configs_path, id: 'google-cal-config' do
+        .switch.right-align
+          %label
+            No
+            = check_box_tag '', '', GoogleCalendarConfig.authorized_by?(current_user.id)
+            %span.lever
+            Yes
 
