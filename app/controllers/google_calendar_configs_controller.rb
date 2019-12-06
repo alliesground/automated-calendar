@@ -8,6 +8,10 @@ class GoogleCalendarConfigsController < ApplicationController
     redirect_to client.authorization_uri.to_s
   end
 
+  def destroy
+    current_user.google_calendar_config.delete
+  end
+
   def callback
     client = Signet::OAuth2::Client.new(client_options)
     client.code = params[:code]

@@ -3,6 +3,11 @@
     $('#google-cal-config :checkbox').change(function() {
       if($(this).is(':checked')) {
         $(this).closest('form').submit()
+      } else {
+        $.ajax({
+          type: 'delete',
+          url: '/google_calendar_configs'
+        })
       }
     })
   })
