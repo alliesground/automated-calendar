@@ -8,4 +8,6 @@ Rails.application.routes.draw do
   get '/google_oauth_callback', to: 'google_calendar_configs#callback', as: 'google_oauth_callback'
 
   resources :google_calendars, only: :index
+
+  resources :events
 end
