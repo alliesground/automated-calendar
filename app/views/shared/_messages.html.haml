@@ -1,0 +1,8 @@
+%div
+  - flash.each do |name, msg|
+    :javascript
+      $(function() {
+        setTimeout(function() {
+          M.toast({html: "#{ msg if msg.is_a?(String) }"})
+        }, 200)
+      })

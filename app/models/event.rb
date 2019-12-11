@@ -9,16 +9,19 @@ class Event < ApplicationRecord
                         :event_end_date,
                         :event_end_time
 
-  #after_save :save_date_time
+  before_save :save_start_time, :save_end_time
 
   private
 
-  def save_date_time
-    self.start_time = start_date_time
+  def save_start_time
+    date = Date.parse(event_start_date)
+    time = Time.parse(event_start_time)
+    self.start_time = (date + time.seconds_since_midnight.seconds).to_datetime
   end
 
-  def start_date_time
-    start_date = Date.parse(event_start_date)
-    start_time = Time.parse(event_start_time)
+  def save_end_time
+    date = Date.parse(event_end_date)
+    time = Time.parse(event_end_time)
+    self.end_time = (date + time.seconds_since_midnight.seconds).to_datetime
   end
 end

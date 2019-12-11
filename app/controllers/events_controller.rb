@@ -4,40 +4,19 @@ class EventsController < ApplicationController
   end
 
   def create
-#    @event = current_user.events.build(
-#      event_params.merge(
-#        start_time: start_date_time,
-#        end_time: end_date_time
-#      )
-#    )
-
     @event = current_user.events.build(event_params)
 
-    if @event.save
-      flash[:success] = 'Event saved'
-    else
-      flash[:error] = 'Something went wrong'
+    respond_to do |format|
+      if @event.save
+        redirect_to events_path
+        flash[:notice] = 'Event saved'
+      end
+
+      format.js
     end
   end
 
   private
-
-  def start_date_time
-    return if params[:start_date].empty? || params[:start_time].empty?
-
-    start_date = Date.parse(params[:start_date])
-    start_time = Time.parse(params[:start_time])
-
-    (start_date + start_time.seconds_since_midnight.seconds).to_datetime
-  end
-
-  def end_date_time
-    return if params[:end_date].empty? || params[:end_time].empty?
-
-    end_date = Date.parse(params[:end_date])
-    end_time = Time.parse(params[:end_time])
-    (end_date + end_time.seconds_since_midnight.seconds).to_datetime
-  end
 
   def event_params
     params.require(:event).permit(
