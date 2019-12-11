@@ -12,27 +12,45 @@
 
       .row
         .input-field.col.s12
-          %input{type:'text', class: 'datepicker', name: 'start_date', id: 'event_start_date'}
-          %label{for: 'event_start_date'}
-            Start Date
+          = f.text_field :event_start_date, class: 'datepicker'
+          = f.label :event_start_date
+          -#
+            %input{type:'text', class: 'datepicker', name: 'event[start_date]', id: 'event_start_date'}
+            %label{for: 'event_start_date'}
+              Start Date
+      .row
+        .input-field.col.s12
+          = f.text_field :event_end_date, class: 'datepicker'
+          = f.label :event_end_date
 
       .row
         .input-field.col.s12
-          %input{type:'text', class: 'timepicker', name: 'start_time', id: 'event_start_time'}
-          %label{for: 'event_start_time'}
-            Start Time
+          = f.text_field :event_start_time, class: 'timepicker'
+          = f.label :event_start_time
 
       .row
         .input-field.col.s12
-          %input{type:'text', class: 'datepicker', name: 'end_date', id: 'event_end_date'}
-          %label{for: 'event_end_date'}
-            End Date
+          = f.text_field :event_end_time, class: 'timepicker'
+          = f.label :event_end_time
 
-      .row
-        .input-field.col.s12
-          %input{type:'text', class: 'timepicker', name: 'end_time', id: 'event_end_time'}
-          %label{for: 'event_end_time'}
-            End Time
+      -#
+        .row
+          .input-field.col.s12
+            %input{type:'text', class: 'timepicker', name: 'start_time', id: 'event_start_time'}
+            %label{for: 'event_start_time'}
+              Start Time
+
+        .row
+          .input-field.col.s12
+            %input{type:'text', class: 'datepicker', name: 'end_date', id: 'event_end_date'}
+            %label{for: 'event_end_date'}
+              End Date
+
+        .row
+          .input-field.col.s12
+            %input{type:'text', class: 'timepicker', name: 'end_time', id: 'event_end_time'}
+            %label{for: 'event_end_time'}
+              End Time
 
       .row
         .input-field.col.s12

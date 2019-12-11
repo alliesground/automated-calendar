@@ -1,0 +1,15 @@
+
+<% @event.errors.each do |key, val| %>
+  console.log("<%= escape_javascript(key) %> => " + "<%= escape_javascript(val) %>")
+<% end %>
+
+$('.helper-text').remove();
+$('input').removeClass('invalid')
+$('input').addClass('valid')
+
+<% @event.errors.each do |key, val| %>
+  $('#event_' + '<%= j(key) %>').after('<span class="helper-text"></span>')
+  $('#event_' + '<%= j(key) %>').next('.helper-text').attr('data-error', "<%= escape_javascript(@event.errors[key][0]) %>")
+  $('#event_' + '<%= j(key) %>').addClass('invalid')
+<% end %>
+
