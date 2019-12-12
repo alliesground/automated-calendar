@@ -1,0 +1,19 @@
+.container.content-holder
+  .row
+    .col.s12
+      %h5.margin-top-0
+        Events
+
+      %table
+        %thead
+          %tr
+            %th Title
+            %th Start Time
+            %th End Time
+
+        %tbody
+          - @events.each do |event|
+            %tr
+              %td= event.title
+              %td= event.display_start_time
+              %td= event.display_end_time

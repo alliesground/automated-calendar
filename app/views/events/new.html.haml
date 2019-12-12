@@ -4,32 +4,32 @@
       %h5.margin-top-0
         New Event
 
-    = form_with model: @event do |f|
-      .row
-        .input-field.col.s12
-          = f.text_field :title
-          = f.label :title
+      = form_with model: @event do |f|
+        .row
+          .input-field.col.s12
+            = f.text_field :title
+            = f.label :title
 
-      .row
-        .input-field.col.s12
-          = f.text_field :event_start_date, class: 'datepicker'
-          = f.label :event_start_date
+        .row
+          .input-field.col.s12
+            = f.text_field :event_start_date, class: 'datepicker'
+            = f.label :event_start_date
 
-      .row
-        .input-field.col.s12
-          = f.text_field :event_end_date, class: 'datepicker'
-          = f.label :event_end_date
+        .row
+          .input-field.col.s12
+            = f.text_field :event_end_date, class: 'datepicker'
+            = f.label :event_end_date
 
-      .row
-        .input-field.col.s12
-          = f.text_field :event_start_time, class: 'timepicker'
-          = f.label :event_start_time
+        .row
+          .input-field.col.s12
+            = f.text_field :event_start_time, class: 'timepicker'
+            = f.label :event_start_time
 
-      .row
-        .input-field.col.s12
-          = f.text_field :event_end_time, class: 'timepicker'
-          = f.label :event_end_time
+        .row
+          .input-field.col.s12
+            = f.text_field :event_end_time, class: 'timepicker'
+            = f.label :event_end_time
 
-      .row
-        .input-field.col.s12
-          = f.submit
+        .row
+          .input-field.col.s12
+            = f.submit
