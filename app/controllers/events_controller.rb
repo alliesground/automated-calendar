@@ -1,6 +1,9 @@
 class EventsController < ApplicationController
   def index
-    @events = current_user.events
+    events = current_user.events
+    @presented_events = events.map do |event|
+      EventPresenter.new(event)
+    end
   end
 
   def new
