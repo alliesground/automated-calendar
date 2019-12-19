@@ -10,6 +10,7 @@
             %th Title
             %th Start Time
             %th End Time
+            %th Actions
 
         %tbody
           - @presented_events.each do |presented_event|
@@ -17,3 +18,7 @@
               %td= presented_event.title
               %td= presented_event.start_time
               %td= presented_event.end_time
+              %td 
+                = link_to 'delete'
+                |
+                = link_to 'update', edit_event_path(presented_event.id)
