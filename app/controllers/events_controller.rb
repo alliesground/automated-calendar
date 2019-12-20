@@ -16,15 +16,15 @@ class EventsController < ApplicationController
   def update
     respond_to do |format|
       if @event.update(event_params)
-        format.js do 
-          head :no_content, 
-               location: event_path(@event), 
-               message: 'Event updated successfully'
+        format.js do
+          flash[:notice] = 'Event updated successfully'
+          redirect_to events_path
         end
       else
         format.js do
           render partial: 'form_errors', 
                  status: 400
+
         end
       end
     end
@@ -40,10 +40,15 @@ class EventsController < ApplicationController
 
     respond_to do |format|
       if @event.save
-        redirect_to events_path
-        flash[:notice] = 'Event saved'
+        format.js do
+          flash[:notice] = 'Event saved'
+          redirect_to events_path
+        end
       else
-        format.js { render partial: 'form_errors' }
+        format.js do 
+          render partial: 'form_errors',
+          status: 400
+        end
       end
     end
   end
