@@ -4,7 +4,18 @@ $('input').removeClass('invalid')
 $('input').addClass('valid')
 
 <% @event.errors.each do |key, val| %>
-  $('#event_' + '<%= j(key) %>').after('<span class="helper-text"></span>')
-  $('#event_' + '<%= j(key) %>').next('.helper-text').attr('data-error', "<%= escape_javascript(@event.errors[key][0]) %>")
-  $('#event_' + '<%= j(key) %>').addClass('invalid')
+  $('#event_' + '<%= j(key) %>')
+    .after('<span class="helper-text"></span>');
+
+  $('#event_' + '<%= j(key) %>')
+    .next('.helper-text')
+    .attr(
+      'data-error', 
+      "<%= escape_javascript(@event.errors[key][0].html_safe) %>"
+    );
+
+  $('#event_' + '<%= j(key) %>')
+    .addClass('invalid');
+
 <% end %>
+

@@ -16,9 +16,16 @@ class EventsController < ApplicationController
   def update
     respond_to do |format|
       if @event.update(event_params)
-        flash.now[:notice] = 'Event updated successfully'
+        format.js do 
+          head :no_content, 
+               location: event_path(@event), 
+               message: 'Event updated successfully'
+        end
       else
-        format.js {render partial: 'form_errors'}
+        format.js do
+          render partial: 'form_errors', 
+                 status: 400
+        end
       end
     end
   end

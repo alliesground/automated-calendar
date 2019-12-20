@@ -1,8 +1,26 @@
 %div
+  :javascript
+    const show_message = msg => {
+      M.toast({html: msg})
+    }
+
+    // Flash message for successful ajax request
+    $(document).on('ajax:success', function(event) {
+      let xhr = event.detail[0]
+      let msg = xhr.getResponseHeader('message')
+
+      show_message(msg)
+    })
+
+    // Flash message for bad ajax request
+    $(document).on('ajax:error', function(event) {
+      show_message('Please fill up the required fields')
+    })
+
+
+    
+  // Normal flash message
   - flash.each do |name, msg|
-    :javascript
-      $(function() {
-        setTimeout(function() {
-          M.toast({html: "#{ msg if msg.is_a?(String) }"})
-        }, 200)
-      })
+    - if msg.is_a?(String)
+      :javascript
+        show_message(msg)
