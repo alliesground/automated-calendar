@@ -4,6 +4,8 @@ const show_message = msg => {
 }
 
 $(document).on('ajax:complete', function(event) {
-  const xhr = event.detail[0]
-  show_message(xhr.getResponseHeader('Message'))
+  const xhr = event.detail[0];
+  const msg = xhr.getResponseHeader('Message');
+
+  if(msg) show_message(msg);
 });

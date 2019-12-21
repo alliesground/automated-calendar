@@ -22,6 +22,7 @@ class EventsController < ApplicationController
         end
       else
         format.js do
+          set_message('Please fill the required fields')
           render partial: 'form_errors', 
                  status: 400
 
@@ -46,6 +47,8 @@ class EventsController < ApplicationController
         end
       else
         format.js do 
+          set_message('Please fill up the required fields')
+
           render partial: 'form_errors',
           status: 400
         end
@@ -59,17 +62,21 @@ class EventsController < ApplicationController
     respond_to do |format|
       if @event.destroyed?
         format.js do
-          response.set_header('Message', "Event #{ @event.title} was deleted successfully")
+          set_message("Event #{ @event.title} was deleted successfully")
         end
       else
         format.js do
-          response.set_header('Message', "Event #{@event.title} could not be deleted")
+          set_message("Event #{@event.title} could not be deleted")
         end
       end
     end
   end
 
   private
+
+  def set_message(msg)
+    response.set_header('Message', msg)
+  end
 
   def event_presenter(event)
     @presented_event = EventPresenter.new(event)
