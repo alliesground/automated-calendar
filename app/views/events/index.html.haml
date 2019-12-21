@@ -19,6 +19,6 @@
               %td= presented_event.start_time
               %td= presented_event.end_time
               %td 
-                = link_to 'delete'
+                = link_to 'delete', presented_event, remote: true, method: :delete, data: { confirm: 'Are you sure?' }
                 |
                 = link_to 'update', edit_event_path(presented_event.id)

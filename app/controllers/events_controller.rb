@@ -1,5 +1,5 @@
 class EventsController < ApplicationController
-  before_action :set_event, only: [:update]
+  before_action :set_event, only: [:update, :destroy]
 
   def index
     events = current_user.events
@@ -53,6 +53,22 @@ class EventsController < ApplicationController
     end
   end
 
+  def destroy
+    @event.destroy
+
+    respond_to do |format|
+      if @event.destroyed?
+        format.js do
+          response.set_header('Message', "Event #{ @event.title} was deleted successfully")
+        end
+      else
+        format.js do
+          response.set_header('Message', "Event #{@event.title} could not be deleted")
+        end
+      end
+    end
+  end
+
   private
 
   def event_presenter(event)
@@ -60,7 +76,7 @@ class EventsController < ApplicationController
   end
 
   def set_event
-    @event = Event.find_by_id(params[:id])
+    @event = current_user.events.find_by_id(params[:id])
   end
 
   def event_params
