@@ -1,24 +1,21 @@
+
 .container.content-holder
   .row
     .col.s12
       %h5.margin-top-0
         Events
 
-      %table
-        %thead
-          %tr
-            %th Title
-            %th Start Time
-            %th End Time
-            %th Actions
+      = month_calendar events: @presented_events do |date, presented_events|
+        = date.day
+        - presented_events.each do |presented_event| 
+          %div
+            = link_to presented_event, 
+              remote: true, 
+              method: :delete, 
+              data: { confirm: 'Are you sure?' } do
+              %i.tiny.material-icons
+                cancel
 
-        %tbody
-          - @presented_events.each do |presented_event|
-            %tr
-              %td= presented_event.title
-              %td= presented_event.start_time
-              %td= presented_event.end_time
-              %td 
-                = link_to 'delete', presented_event, remote: true, method: :delete, data: { confirm: 'Are you sure?' }
-                |
-                = link_to 'update', edit_event_path(presented_event.id)
+            = link_to presented_event.title, edit_event_path(presented_event.id)
+            %span
+              = "#{presented_event.event_start_time} - #{presented_event.event_end_time}"

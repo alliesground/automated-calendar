@@ -2,8 +2,8 @@ class EventsController < ApplicationController
   before_action :set_event, only: [:update, :destroy]
 
   def index
-    events = current_user.events
-    @presented_events = events.map do |event|
+    @events = current_user.events
+    @presented_events = @events.map do |event|
       event_presenter(event)
     end
   end

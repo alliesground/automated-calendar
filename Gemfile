@@ -31,6 +31,7 @@ gem "haml-rails", "~> 2.0"
 gem 'devise'
 gem 'google-api-client', require: 'google/apis/calendar_v3'
 gem 'pry'
+gem "simple_calendar", "~> 2.0"
 
 group :development, :test do
   # Call 'byebug' anywhere in the code to stop execution and get a debugger console
