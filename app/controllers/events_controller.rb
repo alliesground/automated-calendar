@@ -59,17 +59,13 @@ class EventsController < ApplicationController
   def destroy
     @event.destroy
 
-    respond_to do |format|
-      if @event.destroyed?
-        format.js do
-          set_message("Event #{ @event.title} was deleted successfully")
-        end
-      else
-        format.js do
-          set_message("Event #{@event.title} could not be deleted")
-        end
-      end
+    if @event.destroyed?
+      flash[:notice] = "Event #{ @event.title} was deleted successfully"
+    else
+      flash[:notice] = "Event #{@event.title} could not be deleted"
     end
+
+    redirect_to events_path
   end
 
   private

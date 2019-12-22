@@ -4,6 +4,8 @@
       = link_to 'cm', root_path, class: 'brand-logo'
       %ul.right.hide-on-med-and-down#nav-mobile
         %li
+          = link_to 'Events', events_path
+        %li
           = link_to 'Settings', new_google_calendar_config_path
         %li
           - if user_signed_in?
