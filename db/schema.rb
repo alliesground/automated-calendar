@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema.define(version: 2019_12_08_033813) do
+ActiveRecord::Schema.define(version: 2019_12_24_232850) do
 
   # These are extensions that must be enabled in order to support this database
   enable_extension "hstore"
@@ -32,6 +32,15 @@ ActiveRecord::Schema.define(version: 2019_12_08_033813) do
     t.index ["user_id"], name: "index_google_calendar_configs_on_user_id"
   end
 
+  create_table "google_calendars", id: false, force: :cascade do |t|
+    t.string "id", null: false
+    t.bigint "user_id", null: false
+    t.string "summary"
+    t.string "description"
+    t.index ["id"], name: "index_google_calendars_on_id", unique: true
+    t.index ["user_id"], name: "index_google_calendars_on_user_id"
+  end
+
   create_table "users", force: :cascade do |t|
     t.string "email", default: "", null: false
     t.string "encrypted_password", default: "", null: false
@@ -46,4 +55,5 @@ ActiveRecord::Schema.define(version: 2019_12_08_033813) do
 
   add_foreign_key "events", "users"
   add_foreign_key "google_calendar_configs", "users"
+  add_foreign_key "google_calendars", "users"
 end
