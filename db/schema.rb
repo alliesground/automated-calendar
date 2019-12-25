@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema.define(version: 2019_12_24_232850) do
+ActiveRecord::Schema.define(version: 2019_12_25_004211) do
 
   # These are extensions that must be enabled in order to support this database
   enable_extension "hstore"
@@ -35,7 +35,7 @@ ActiveRecord::Schema.define(version: 2019_12_24_232850) do
   create_table "google_calendars", id: false, force: :cascade do |t|
     t.string "id", null: false
     t.bigint "user_id", null: false
-    t.string "summary"
+    t.string "name"
     t.string "description"
     t.index ["id"], name: "index_google_calendars_on_id", unique: true
     t.index ["user_id"], name: "index_google_calendars_on_user_id"
