@@ -1,0 +1,22 @@
+.container.content-holder
+  .row
+    .col.s12
+      .row
+        %h5.margin-top-0
+          Create New Calendar
+
+      .row
+        = form_with model: @google_calendar do |f|
+          .row
+            .input-field.col.s12
+              = f.text_field :name
+              = f.label :name
+          .row
+            .input-field.col.s12
+              = f.text_field :description
+              = f.label :description
+
+          .row
+            .input-field.col.s12
+              = f.submit
+            

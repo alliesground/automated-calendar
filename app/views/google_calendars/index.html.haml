@@ -1,7 +1,12 @@
-%h1 
-  Google Calendars
-%ul
-  - @calendar_list.items.each do |calendar|
-    %li
-      = calendar.summary
+.container.content-holder
+  .row
+    .col.s12
+      .row
+        %h5.margin-top-0
+          Google Calendars
+      .row  
+        %ul
+          - @calendar_list.items.each do |calendar|
+            %li
+              = calendar.summary
   
