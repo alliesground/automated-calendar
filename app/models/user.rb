@@ -6,4 +6,5 @@ class User < ApplicationRecord
 
   has_one :google_calendar_config
   has_many :events
+  has_many :google_calendars
 end

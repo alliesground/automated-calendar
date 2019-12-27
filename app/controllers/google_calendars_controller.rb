@@ -17,6 +17,15 @@ class GoogleCalendarsController < ApplicationController
 
     get_service do |service|
       response = service.insert_calendar(calendar)
+
+      @google_calendar = current_user.google_calendars.build(google_calendar_params.merge(id: response.id))
+
+      if @google_calendar.save
+        flash[:notice] = 'Calendar created successfully'
+        redirect_to google_calendars_path
+      else
+        response.set_header('Message', 'Please fill up the required fields')
+      end
     end
   end
 
