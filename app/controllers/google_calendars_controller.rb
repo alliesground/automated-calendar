@@ -11,21 +11,15 @@ class GoogleCalendarsController < ApplicationController
   end
 
   def create
-    calendar = Google::Apis::CalendarV3::Calendar.new(
-      summary: params[:google_calendar][:name]
-    )
+    @google_calendar = current_user.google_calendars.build(google_calendar_params)
 
-    get_service do |service|
-      response = service.insert_calendar(calendar)
+    if @google_calendar.save
+      flash[:notice] = 'Calendar created successfully'
 
-      @google_calendar = current_user.google_calendars.build(google_calendar_params.merge(id: response.id))
-
-      if @google_calendar.save
-        flash[:notice] = 'Calendar created successfully'
-        redirect_to google_calendars_path
-      else
-        response.set_header('Message', 'Please fill up the required fields')
-      end
+      GoogleCalendarWorker.perform_async(@google_calendar.id, @google_calendar.name, current_user.id)
+      redirect_to google_calendars_path
+    else
+      response.set_header('Message', 'Please fill up the required fields')
     end
   end
 
