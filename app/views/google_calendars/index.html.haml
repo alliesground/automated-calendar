@@ -6,7 +6,7 @@
           Google Calendars
       .row  
         %ul
-          - @google_calendars.each do |calendar|
+          - @calendar_list.items.each do |calendar|
             %li
-              = calendar.name
+              = calendar.summary
   

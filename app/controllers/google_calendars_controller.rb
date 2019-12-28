@@ -1,10 +1,10 @@
 class GoogleCalendarsController < ApplicationController
 
   def index
-    @google_calendars = GoogleCalendar.all
-#    get_service do |service|
-#      @calendar_list = service.list_calendar_lists
-#    end
+    #@google_calendars = GoogleCalendar.all
+    get_service do |service|
+      @calendar_list = service.list_calendar_lists
+    end
   end
 
   def new
