@@ -5,7 +5,7 @@
       %h5.margin-top-0
         Events
     .col.s4
-      = link_to 'Add Event', new_event_path, class: 'btn-small right'
+      = link_to 'Add Event', new_event_registration_path, class: 'btn-small right'
 
     .col.s12
       = month_calendar events: @presented_events, attribute: :start_time, end_attribute: :end_time do |date, presented_events|

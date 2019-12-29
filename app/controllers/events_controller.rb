@@ -1,5 +1,5 @@
 class EventsController < ApplicationController
-  before_action :set_event, only: [:update, :destroy]
+  before_action :set_event, only: [:edit, :update, :destroy]
 
   def index
     @events = current_user.events
@@ -8,15 +8,39 @@ class EventsController < ApplicationController
     end
   end
 
+  def new
+    @event_registration = EventRegistration.new
+  end
+
+  def create
+    @event_registration = EventRegistration.new
+
+    respond_to do |format|
+      if @event_registration.save(event_params.merge(user_id: current_user.id))
+        format.js do
+          flash[:notice] = 'Event saved'
+          redirect_to events_path
+        end
+      else
+        format.js do
+          set_message('Please fill up the required fields')
+
+          render partial: 'form_errors',
+          status: 400
+        end
+      end
+    end
+  end
+
   def edit 
-    event = current_user.events.find_by_id(params[:id])
-    #event_presenter(event)
-    @event_registration = EventRegistration.new(event: event)
+    @event_registration = EventRegistration.new(event: @event)
   end 
 
   def update
+    @event_registration = EventRegistration.new(event: @event) 
+
     respond_to do |format|
-      if @event.update(event_params)
+      if @event_registration.update(event_params)
         format.js do
           flash[:notice] = 'Event updated successfully'
           redirect_to events_path
@@ -30,51 +54,6 @@ class EventsController < ApplicationController
         end
       end
     end
-  end
-
-  def new
-    @event_registration = EventRegistration.new
-#    event = Event.new
-#    event_presenter(event)
-  end
-
-  def create
-    @event_registration = EventRegistration.new(event_params.merge(user: current_user))
-
-    respond_to do |format|
-      if @event_registration.save
-        format.js do
-          flash[:notice] = 'Event saved'
-          redirect_to events_path
-        end
-      else
-        format.js do 
-          set_message('Please fill up the required fields')
-
-          render partial: 'form_errors',
-          status: 400
-        end
-      end
-    end
-
-
-#    @event = current_user.events.build(event_params)
-
-#    respond_to do |format|
-#      if @event.save
-#        format.js do
-#          flash[:notice] = 'Event saved'
-#          redirect_to events_path
-#        end
-#      else
-#        format.js do 
-#          set_message('Please fill up the required fields')
-#
-#          render partial: 'form_errors',
-#          status: 400
-#        end
-#      end
-#    end
   end
 
   def destroy

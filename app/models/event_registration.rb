@@ -25,6 +25,10 @@ class EventRegistration
 #    end
 #  end
 
+  def self.model_name
+    ActiveModel::Name.new(self, nil, 'Event')
+  end
+
   def event_presenter
     EventPresenter.new(event)
   end
