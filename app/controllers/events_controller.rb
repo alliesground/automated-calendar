@@ -10,7 +10,8 @@ class EventsController < ApplicationController
 
   def edit 
     event = current_user.events.find_by_id(params[:id])
-    event_presenter(event)
+    #event_presenter(event)
+    @event_registration = EventRegistration.new(event: event)
   end 
 
   def update
@@ -32,15 +33,16 @@ class EventsController < ApplicationController
   end
 
   def new
-    event = Event.new
-    event_presenter(event)
+    @event_registration = EventRegistration.new
+#    event = Event.new
+#    event_presenter(event)
   end
 
   def create
-    @event = current_user.events.build(event_params)
+    @event_registration = EventRegistration.new(event_params.merge(user: current_user))
 
     respond_to do |format|
-      if @event.save
+      if @event_registration.save
         format.js do
           flash[:notice] = 'Event saved'
           redirect_to events_path
@@ -54,6 +56,25 @@ class EventsController < ApplicationController
         end
       end
     end
+
+
+#    @event = current_user.events.build(event_params)
+
+#    respond_to do |format|
+#      if @event.save
+#        format.js do
+#          flash[:notice] = 'Event saved'
+#          redirect_to events_path
+#        end
+#      else
+#        format.js do 
+#          set_message('Please fill up the required fields')
+#
+#          render partial: 'form_errors',
+#          status: 400
+#        end
+#      end
+#    end
   end
 
   def destroy

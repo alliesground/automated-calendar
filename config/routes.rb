@@ -10,4 +10,6 @@ Rails.application.routes.draw do
   resources :google_calendars
 
   resources :events
+
+  resources :event_registrations
 end
