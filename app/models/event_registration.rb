@@ -1,7 +1,7 @@
 class EventRegistration
   include ActiveModel::Model
 
-  delegate :id, :title, to: :event 
+  delegate :id, :title, :persisted?, to: :event 
   delegate :event_start_date, 
            :event_end_date, 
            :event_start_time, 
@@ -21,10 +21,6 @@ class EventRegistration
 
   def event
     @event ||= Event.new
-  end
-
-  def persisted?
-    event.persisted?
   end
 
   def save(params)
