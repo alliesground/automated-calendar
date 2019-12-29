@@ -11,20 +11,6 @@ class EventRegistration
 
   attr_writer :event
 
-#  def initialize(attributes={})
-#    super
-#
-#    if user.present?
-#      @event ||= user.events.build(
-#        attributes.slice(:title, 
-#                         :event_start_date,
-#                         :event_end_date,
-#                         :event_start_time,
-#                         :event_end_time)
-#      )
-#    end
-#  end
-
   def self.model_name
     ActiveModel::Name.new(self, nil, 'Event')
   end
