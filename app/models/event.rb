@@ -2,6 +2,7 @@ class Event < ApplicationRecord
   attr_accessor :event_start_date, :event_end_date, :event_start_time, :event_end_time
 
   belongs_to :user
+  has_one :google_event
 
   validates_presence_of :title,
                         :event_start_date,
