@@ -10,6 +10,8 @@ class EventRegistration
            :event_start_time, 
            :event_end_time, to: :event_presenter
 
+  delegate :google_calendar_id, to: :google_event
+
   validate :validate_children
 
   attr_writer :event
@@ -26,12 +28,17 @@ class EventRegistration
     @event ||= Event.new
   end
 
+  def google_event
+    @google_event ||= (event.google_event || event.build_google_event)
+  end
+
   def save(params)
     event.attributes = event_params(params)
 
     if valid?
       if event.save
-        event.create_google_event(google_calendar_id: params[:google_calendar_id])
+        google_event.attributes = { google_calendar_id: params[:google_calendar_id] }
+        google_event.save
       end
       true
     else
@@ -44,7 +51,7 @@ class EventRegistration
 
     if valid?
       if event.save
-        GoogleEvent.update(google_calendar_id: params[:google_calendar_id])
+        google_event.update(google_calendar_id: params[:google_calendar_id])
       end
       true
     else
