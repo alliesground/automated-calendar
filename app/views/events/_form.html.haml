@@ -28,9 +28,7 @@
     .input-field.col.s12
       %i{class: 'material-icons prefix'}
         calendar_today
-      %input{id: 'calendar', type: 'text'}
-      %label{for: 'calendar'}
-        Calendar
+      = f.collection_select(:google_calendar_id, GoogleCalendar.all, :id, :name, prompt: true, selected: f.object.event.google_event.google_calendar_id)
 
   .row
     .input-field.col.s12

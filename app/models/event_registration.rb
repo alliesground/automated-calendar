@@ -1,7 +1,10 @@
 class EventRegistration
   include ActiveModel::Model
 
-  delegate :id, :title, :persisted?, to: :event 
+  delegate :id, 
+           :title, 
+           :persisted?, to: :event 
+
   delegate :event_start_date, 
            :event_end_date, 
            :event_start_time, 
@@ -28,7 +31,7 @@ class EventRegistration
 
     if valid?
       if event.save
-        #event.create_google_event(params[:google_calendar_id])
+        event.create_google_event(google_calendar_id: params[:google_calendar_id])
       end
       true
     else
@@ -41,10 +44,7 @@ class EventRegistration
 
     if valid?
       if event.save
-#        GoogleEventUpdater.perform_async(
-#          params[:google_calendar_id], 
-#          event.id
-#        )
+        GoogleEvent.update(google_calendar_id: params[:google_calendar_id])
       end
       true
     else
