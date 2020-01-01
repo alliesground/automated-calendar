@@ -27,7 +27,9 @@ class EventRegistration
     event.attributes = event_params(params)
 
     if valid?
-      event.save
+      if event.save
+        #event.create_google_event(params[:google_calendar_id])
+      end
       true
     else
       false
@@ -38,7 +40,12 @@ class EventRegistration
     event.attributes = event_params(params)
 
     if valid?
-      event.save
+      if event.save
+#        GoogleEventUpdater.perform_async(
+#          params[:google_calendar_id], 
+#          event.id
+#        )
+      end
       true
     else
       false

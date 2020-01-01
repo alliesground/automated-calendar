@@ -37,7 +37,7 @@ class EventsController < ApplicationController
   end 
 
   def update
-    @event_registration = EventRegistration.new(event: @event) 
+    @event_registration = EventRegistration.new(event: @event)
 
     respond_to do |format|
       if @event_registration.update(event_params)
