@@ -1,24 +1,8 @@
 # README
 
-This README would normally document whatever steps are necessary to get the
-application up and running.
+## Description
 
-Things you may want to cover:
+This application uses Google Calendar API to push and update events to user's Gmail Calendar.
 
-* Ruby version
+The Logged in User will be able to configure which other user's in his/her contact list will receive updates of the events in their Gmail Calendar.
 
-* System dependencies
-
-* Configuration
-
-* Database creation
-
-* Database initialization
-
-* How to run the test suite
-
-* Services (job queues, cache servers, search engines, etc.)
-
-* Deployment instructions
-
-* ...
