@@ -13,8 +13,15 @@ class EventRegistration
   delegate :google_calendar_id, to: :google_event
 
   validate :validate_children
+  validates_presence_of :google_calendar_id
 
   attr_writer :event
+  attr_reader :registrar
+
+  def initialize(registrar:, **attributes)
+    super(attributes)
+    @registrar = registrar
+  end
 
   def self.model_name
     ActiveModel::Name.new(self, nil, 'Event')
@@ -25,7 +32,7 @@ class EventRegistration
   end
 
   def event
-    @event ||= Event.new
+    @event ||= registrar.events.build
   end
 
   def google_event
@@ -34,12 +41,14 @@ class EventRegistration
 
   def save(params)
     event.attributes = event_params(params)
+    google_event.attributes = { google_calendar_id: params[:google_calendar_id] }
 
     if valid?
-      if event.save
-        google_event.attributes = { google_calendar_id: params[:google_calendar_id] }
-        google_event.save
-      end
+      event.save
+      google_event.save
+
+      GoogleCalendarEventCreator.perform_async(event.id, params[:google_calendar_id], registrar.id)
+
       true
     else
       false
@@ -66,8 +75,7 @@ class EventRegistration
                  :event_start_date, 
                  :event_end_date, 
                  :event_start_time, 
-                 :event_end_time, 
-                 :user_id)
+                 :event_end_time)
   end
 
   def validate_children

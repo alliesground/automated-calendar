@@ -16,13 +16,13 @@ class Event < ApplicationRecord
 
   def save_start_time
     date = Date.parse(event_start_date)
-    time = Time.parse(event_start_time)
+    time = Time.zone.parse(event_start_time)
     self.start_time = (date + time.seconds_since_midnight.seconds).to_datetime
   end
 
   def save_end_time
     date = Date.parse(event_end_date)
-    time = Time.parse(event_end_time)
+    time = Time.zone.parse(event_end_time)
     self.end_time = (date + time.seconds_since_midnight.seconds).to_datetime
   end
 end

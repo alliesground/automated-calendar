@@ -9,14 +9,14 @@ class EventsController < ApplicationController
   end
 
   def new
-    @event_registration = EventRegistration.new
+    @event_registration = EventRegistration.new(registrar: current_user)
   end
 
   def create
-    @event_registration = EventRegistration.new
+    @event_registration = EventRegistration.new(registrar: current_user)
 
     respond_to do |format|
-      if @event_registration.save(event_params.merge(user_id: current_user.id))
+      if @event_registration.save(event_params)
         format.js do
           flash[:notice] = 'Event saved'
           redirect_to events_path
@@ -33,11 +33,17 @@ class EventsController < ApplicationController
   end
 
   def edit 
-    @event_registration = EventRegistration.new(event: @event)
+    @event_registration = EventRegistration.new(
+      event: @event, 
+      registrar: current_user
+    )
   end 
 
   def update
-    @event_registration = EventRegistration.new(event: @event)
+    @event_registration = EventRegistration.new(
+      event: @event,
+      registrar: current_user
+    )
 
     respond_to do |format|
       if @event_registration.update(event_params)
