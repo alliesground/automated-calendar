@@ -88,7 +88,7 @@ class EventRegistration
       save_event
       google_event.save
 
-      #GoogleCalendarEventCreator.perform_async(event.id, params[:google_calendar_id], registrar.id)
+      GoogleCalendarEventCreator.perform_async(event.id, params[:google_calendar_id], registrar.id)
 
       true
     else
@@ -101,12 +101,9 @@ class EventRegistration
     event.attributes = params.slice(:title)
     google_event.attributes = params.slice(:google_calendar_id)
 
-    #event.attributes = event_params(params)
-
     if valid?
       save_event
       google_event.save
-      #google_event.update(google_calendar_id: params[:google_calendar_id])
       true
     else
       false
