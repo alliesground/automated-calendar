@@ -80,11 +80,9 @@ class EventRegistration
   end
 
   def save(params)
-    self.attributes = event_params(params)
-
+    self.attributes = event_date_time_params(params)
     event.attributes = params.slice(:title)
-
-    google_event.attributes = { google_calendar_id: params[:google_calendar_id] }
+    google_event.attributes = params.slice(:google_calendar_id)
 
     if valid?
       save_event
@@ -99,15 +97,16 @@ class EventRegistration
   end
 
   def update(params)
-    self.attributes = event_params(params)
-
+    self.attributes = event_date_time_params(params)
     event.attributes = params.slice(:title)
+    google_event.attributes = params.slice(:google_calendar_id)
 
     #event.attributes = event_params(params)
 
     if valid?
       save_event
-      google_event.update(google_calendar_id: params[:google_calendar_id])
+      google_event.save
+      #google_event.update(google_calendar_id: params[:google_calendar_id])
       true
     else
       false
@@ -116,7 +115,7 @@ class EventRegistration
 
   private
 
-  def event_params(params)
+  def event_date_time_params(params)
     params.slice(:event_start_date, 
                  :event_end_date, 
                  :event_start_time, 
