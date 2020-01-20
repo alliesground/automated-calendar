@@ -7,14 +7,6 @@ class EventPresenter
     @event = event
   end
 
-  def start_time
-    event.start_time.strftime("%c")
-  end
-
-  def end_time
-    event.end_time.strftime("%c")
-  end
-
   def event_start_date
     event.start_time&.strftime('%b %d, %Y')
   end

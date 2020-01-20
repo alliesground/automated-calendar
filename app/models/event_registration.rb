@@ -3,24 +3,43 @@ class EventRegistration
 
   delegate :id, 
            :title, 
-           :persisted?, to: :event 
-
-  delegate :event_start_date, 
-           :event_end_date, 
-           :event_start_time, 
-           :event_end_time, to: :event_presenter
+           :persisted?, to: :event
 
   delegate :google_calendar_id, to: :google_event
 
   validate :validate_children
-  validates_presence_of :google_calendar_id
+  validates_presence_of :event_start_date,
+                        :event_end_date,
+                        :event_start_time,
+                        :event_end_time,
+                        :google_calendar_id
 
-  attr_writer :event
+  attr_accessor :event_start_date,
+                :event_end_date,
+                :event_start_time,
+                :event_end_time
+
+  def event_start_date
+    @event_start_date || event_presenter.event_start_date
+  end
+
+  def event_end_date
+    @event_end_date || event_presenter.event_end_date
+  end
+
+  def event_start_time
+    @event_start_time || event_presenter.event_start_time
+  end
+
+  def event_end_time
+    @event_end_time || event_presenter.event_end_time
+  end
+
   attr_reader :registrar
 
-  def initialize(registrar:, **attributes)
-    super(attributes)
+  def initialize(registrar:, event: nil)
     @registrar = registrar
+    @event = event
   end
 
   def self.model_name
@@ -39,15 +58,39 @@ class EventRegistration
     @google_event ||= (event.google_event || event.build_google_event)
   end
 
+  def set_start_time
+    date = Time.zone.parse(event_start_date)
+    time = Time.zone.parse(event_start_time)
+    Time.zone.parse("#{date.strftime('%F')} #{time.strftime('%T')}")
+  end
+
+  def set_end_time
+    date = Time.zone.parse(event_end_date)
+    time = Time.zone.parse(event_end_time)
+    Time.zone.parse("#{date.strftime('%F')} #{time.strftime('%T')}")
+  end
+
+  def save_event
+    event.attributes = {
+      start_time: set_start_time,
+      end_time: set_end_time
+    }
+
+    event.save
+  end
+
   def save(params)
-    event.attributes = event_params(params)
+    self.attributes = event_params(params)
+
+    event.attributes = params.slice(:title)
+
     google_event.attributes = { google_calendar_id: params[:google_calendar_id] }
 
     if valid?
-      event.save
+      save_event
       google_event.save
 
-      GoogleCalendarEventCreator.perform_async(event.id, params[:google_calendar_id], registrar.id)
+      #GoogleCalendarEventCreator.perform_async(event.id, params[:google_calendar_id], registrar.id)
 
       true
     else
@@ -56,12 +99,15 @@ class EventRegistration
   end
 
   def update(params)
-    event.attributes = event_params(params)
+    self.attributes = event_params(params)
+
+    event.attributes = params.slice(:title)
+
+    #event.attributes = event_params(params)
 
     if valid?
-      if event.save
-        google_event.update(google_calendar_id: params[:google_calendar_id])
-      end
+      save_event
+      google_event.update(google_calendar_id: params[:google_calendar_id])
       true
     else
       false
@@ -71,8 +117,7 @@ class EventRegistration
   private
 
   def event_params(params)
-    params.slice(:title, 
-                 :event_start_date, 
+    params.slice(:event_start_date, 
                  :event_end_date, 
                  :event_start_time, 
                  :event_end_time)
