@@ -15,6 +15,12 @@ class GoogleCalWrapper
     end
   end
 
+  def insert_calendar(calendar)
+    get_service do |service|
+      service.insert_calendar(calendar)
+    end
+  end
+
   private
 
   def get_service
