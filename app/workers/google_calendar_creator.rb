@@ -1,4 +1,4 @@
-class GoogleCalendarWorker
+class GoogleCalendarCreator
   require_relative '../../lib/google_cal_wrapper.rb'
 
   include Rails.application.routes.url_helpers
