@@ -1,4 +1,4 @@
-class GoogleCalendarCreator
+class GoogleCalendarWorker
   require_relative '../../lib/google_cal_wrapper.rb'
 
   include Rails.application.routes.url_helpers
@@ -14,7 +14,9 @@ class GoogleCalendarCreator
       summary: name
     )
 
-    google_cal_wrapper.insert_calendar(calendar)
+    response = google_cal_wrapper.insert_calendar(calendar)
 
+    google_calendar = GoogleCalendar.find_by(id: id)
+    google_calendar&.update(remote_id: response.id)
   end
 end

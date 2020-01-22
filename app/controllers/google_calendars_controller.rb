@@ -15,7 +15,7 @@ class GoogleCalendarsController < ApplicationController
     if @google_calendar.save
       flash[:notice] = 'Calendar created successfully'
 
-      GoogleCalendarCreator.perform_async(@google_calendar.id, @google_calendar.name, current_user.id)
+      GoogleCalendarWorker.perform_async(@google_calendar.id, @google_calendar.name, current_user.id)
       redirect_to google_calendars_path
     else
       response.set_header('Message', 'Please fill up the required fields')
