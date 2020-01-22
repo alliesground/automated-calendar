@@ -21,6 +21,15 @@ class GoogleCalWrapper
     end
   end
 
+  def insert_event(cal_id, event)
+    get_service do |service|
+      service.insert_event(
+        cal_id,
+        event
+      )
+    end
+  end
+
   private
 
   def get_service
