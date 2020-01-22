@@ -1,10 +1,8 @@
 class GoogleCalendarsController < ApplicationController
 
   def index
-    #@google_calendars = GoogleCalendar.all
-    get_service do |service|
-      @calendar_list = service.list_calendar_lists
-    end
+    google_cal_wrapper = GoogleCalWrapper.new(current_user)
+    @calendar_list = google_cal_wrapper.list_calendar_lists
   end
 
   def new
@@ -26,31 +24,10 @@ class GoogleCalendarsController < ApplicationController
 
   private
 
-  def get_service
-    client.update!(current_user.google_calendar_config.authorization)
-    service.authorization = client
-
-    begin
-      yield service
-    rescue Google::Apis::AuthorizationError
-      response = client.refresh!
-      current_user.google_calendar_config.authorization.merge(response)
-      retry
-    end
-  end
-
   def google_calendar_params
     params.require(:google_calendar).permit(
       :name,
       :description
     )
-  end
-
-  def client
-    @client ||= Signet::OAuth2::Client.new(client_options)
-  end
-
-  def service
-    @service ||= Google::Apis::CalendarV3::CalendarService.new
   end
 end
