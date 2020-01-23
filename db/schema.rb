@@ -49,12 +49,12 @@ ActiveRecord::Schema.define(version: 2020_01_23_011434) do
   end
 
   create_table "outbound_event_configs", force: :cascade do |t|
-    t.bigint "user_id", null: false
+    t.bigint "owner_id", null: false
     t.bigint "google_calendar_id", null: false
     t.bigint "receiver_id", null: false
     t.index ["google_calendar_id"], name: "index_outbound_event_configs_on_google_calendar_id"
+    t.index ["owner_id"], name: "index_outbound_event_configs_on_owner_id"
     t.index ["receiver_id"], name: "index_outbound_event_configs_on_receiver_id"
-    t.index ["user_id"], name: "index_outbound_event_configs_on_user_id"
   end
 
   create_table "users", force: :cascade do |t|
@@ -75,6 +75,6 @@ ActiveRecord::Schema.define(version: 2020_01_23_011434) do
   add_foreign_key "google_events", "events"
   add_foreign_key "google_events", "google_calendars"
   add_foreign_key "outbound_event_configs", "google_calendars"
-  add_foreign_key "outbound_event_configs", "users"
+  add_foreign_key "outbound_event_configs", "users", column: "owner_id"
   add_foreign_key "outbound_event_configs", "users", column: "receiver_id"
 end
