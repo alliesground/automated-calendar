@@ -7,4 +7,5 @@ class User < ApplicationRecord
   has_one :google_calendar_config
   has_many :events
   has_many :google_calendars
+  has_many :outbound_event_configs, foreign_key: 'owner_id'
 end

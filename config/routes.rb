@@ -13,4 +13,6 @@ Rails.application.routes.draw do
   resources :google_calendars
 
   resources :events
+
+  resources :outbound_event_configs, only: [:new, :create]
 end

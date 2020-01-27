@@ -1,0 +1,21 @@
+.container.content-holder
+  .row
+    .col.s12
+      .row
+        %h5.margin-top-0
+          Outbound Event Settings
+
+      - GoogleCalendar.all.each_with_index do |google_cal, cal_idx|
+        %h6= google_cal.name
+        .row
+          = form_with model: @outbound_event_config_form do |f|
+            = f.hidden_field :google_calendar_id, value: google_cal.id
+            - f.object.receiver_ids.each_index do |idx|
+              .row
+                = collection_select('', '', User.all, :id, :email, {include_blank: 'Select a receiver', selected: f.object.receiver_ids[idx]}, { name: 'outbound_event_config[receiver_ids][]', id: "outbound_event_config_#{google_cal.id}_receiver_id_#{idx}"})
+
+            .row
+              = f.submit 'Save'
+              = f.submit 'Add'
+        
+
