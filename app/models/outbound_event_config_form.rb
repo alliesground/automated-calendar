@@ -22,13 +22,13 @@ class OutboundEventConfigForm
 
   def save
     return if invalid?
-
     receiver_ids.each do |receiver_id|
       user.outbound_event_configs.where(
         receiver_id: receiver_id,
         google_calendar_id: google_calendar_id
       ).first_or_create
     end
+    true
   end
 
   def outbound_event_config(receiver_id)
