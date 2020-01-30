@@ -1,3 +1,33 @@
+:javascript
+
+  $(function(){
+
+    $('form').on('click', '.add-btn', function(){
+
+      $('select').formSelect('destroy')
+
+      var $selectWrapperRow = $(this)
+                                .closest('.row')
+                                .prev('.row')
+                                .clone()
+
+      var $receiverSelect = $selectWrapperRow.find('select')
+
+      var id = $receiverSelect.attr('id')
+      var newIdLastChar = parseInt(id.charAt(id.length - 1)) + 1
+      var newId = id.slice(0, -1) + newIdLastChar.toString()
+
+      $receiverSelect.attr('id', newId)
+
+      $receiverSelect.children('option:selected').removeAttr('selected')
+
+      $selectWrapperRow.insertBefore($(this).closest('.row'));
+
+      $('select').formSelect();
+    })
+  })
+  
+
 .container.content-holder
   .row
     .col.s12
@@ -15,7 +45,7 @@
                 = collection_select('', '', User.all, :id, :email, {include_blank: 'Select a receiver', selected: f.object.receiver_ids[idx]}, { name: 'outbound_event_config[receiver_ids][]', id: "outbound_event_config_form_#{google_cal.id}_receiver_id_#{idx}"})
 
             .row
-              = f.submit 'Save'
-              = f.submit 'Add'
-        
+              = f.submit 'Save', class: 'btn-small'
+              %btn.btn-small.add-btn{:id => "add_btn_#{google_cal.id}"}
+                Add
 

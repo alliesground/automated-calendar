@@ -1,3 +1,7 @@
+document.addEventListener('turbolinks:before-cache', function() {
+  $('select').formSelect('destroy')
+})
+
 document.addEventListener('turbolinks:load', function() {
   $('.slider').slider();
   $('.carousel').carousel();
