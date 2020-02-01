@@ -1,9 +1,11 @@
 :javascript
 
   $(function(){
+    var selectedReceiverIds = [1, 2]
 
     $('form').on('click', '.add-btn', function(){
 
+      /* Destroying materializecss selectbox instance */
       $('select').formSelect('destroy')
 
       var $selectWrapperRow = $(this)
@@ -13,6 +15,7 @@
 
       var $receiverSelect = $selectWrapperRow.find('select')
 
+      /* Generating dynamic Id for new dynamic select box */
       var id = $receiverSelect.attr('id')
       var newIdLastChar = parseInt(id.charAt(id.length - 1)) + 1
       var newId = id.slice(0, -1) + newIdLastChar.toString()
@@ -21,10 +24,18 @@
 
       $receiverSelect.children('option:selected').removeAttr('selected')
 
+      /* Filtering out selected users */
+      selectedReceiverIds.forEach(function(receiverId) {
+        var $option = $receiverSelect.children("option[value='" + receiverId + "']")
+        $option.remove();
+      })
+
       $selectWrapperRow.insertBefore($(this).closest('.row'));
 
       $('select').formSelect();
+
     })
+
   })
   
 
