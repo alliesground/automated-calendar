@@ -1,0 +1,64 @@
+:javascript
+  $(function() {
+
+    const generateUserSelect = (users) => {
+
+      var userSelect = document.createElement('select');
+
+      var placeholder = document.createElement('option');
+      placeholder.text = 'Please select a receiver';
+      placeholder.value = "";
+      placeholder.placeholder = true;
+      userSelect.appendChild(placeholder);
+
+      users.forEach(function(user) {
+        userSelect.options[userSelect.options.length] = new Option(
+          user.email, 
+          user.id
+        )
+      })
+      
+      return userSelect;
+    }
+    
+    $('form').on('click', '.add-btn', function() {
+      var $that = $(this);
+      
+      $.get('/users')
+        .then(generateUserSelect)
+        .then(function( userSelect ) {
+          var $userSelect = $(userSelect)
+          $userSelect.insertBefore($that.closest('.row'));
+          $userSelect.formSelect();
+
+          $that.closest('.row').prev('.select-wrapper').wrap("<div class='row'></div>");
+        })
+
+    });
+  });
+  
+
+.container.content-holder
+  .row
+    .col.s12
+      .row
+        %h5.margin-top-0
+          Outbound Event Settings
+
+      - GoogleCalendar.all.each_with_index do |google_cal, cal_idx|
+        %h6= google_cal.name
+        - @outbound_event_config_form.receiver_ids.each do |id|
+          .row
+            = User.find_by(id: id).email
+        .row
+          = form_with model: @outbound_event_config_form do |f|
+            = f.hidden_field :google_calendar_id, value: google_cal.id
+            - f.object.receiver_ids.each_index do |idx|
+              -#
+                .row
+                  = collection_select('', '', User.all, :id, :email, {include_blank: 'Select a receiver', selected: f.object.receiver_ids[idx]}, { name: 'outbound_event_config[receiver_ids][]', id: "outbound_event_config_form_#{google_cal.id}_receiver_id_#{idx}"})
+
+            .row
+              = f.submit 'Save', class: 'btn-small'
+              %btn.btn-small.add-btn{:id => "add_btn_#{google_cal.id}"}
+                Add
