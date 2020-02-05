@@ -20,12 +20,28 @@
       
       return userSelect;
     }
+
+    var selectedReceiverIds = [1, 2]
+
+    /* Filtering out selected users */
+    const removeExistingReceiverOptions = (userSelect) => {
+
+      selectedReceiverIds.forEach(function(receiverId) {
+        $userSelect = $(userSelect)
+        var $option = $userSelect.children("option[value='" + receiverId + "']")
+
+        $option.remove();
+      })
+
+      return $userSelect.get(0);
+    }
     
     $('form').on('click', '.add-btn', function() {
       var $that = $(this);
       
       $.get('/users')
         .then(generateUserSelect)
+        .then(removeExistingReceiverOptions)
         .then(function( userSelect ) {
           var $userSelect = $(userSelect)
           $userSelect.insertBefore($that.closest('.row'));
