@@ -21,27 +21,48 @@
       return userSelect;
     }
 
-    var selectedReceiverIds = [1, 2]
+    /* populating configured receivers */
+    var allSelectedReceiverIds = {}
+
+    $('.configs').each(function() {
+
+      allSelectedReceiverIds[$(this).data('configs-container-id')] = $(this).children('[data-id]').map(function(i, ele) {
+        return $(ele).data('id')
+      })
+      .get()
+    });
+    console.log(allSelectedReceiverIds);
+    console.log('Entries: ', Object.entries(allSelectedReceiverIds))
 
     /* Filtering out selected users */
-    const removeExistingReceiverOptions = (userSelect) => {
+    const removeExistingReceiverOptions = (userSelect, currentConfigsContainerId) => {
+      var $userSelect = $(userSelect);
+      
+      for([configsContainerId, selectedReceiverIds] of Object.entries(allSelectedReceiverIds)) {
+        
+        if(currentConfigsContainerId == configsContainerId) {
 
-      selectedReceiverIds.forEach(function(receiverId) {
-        $userSelect = $(userSelect)
-        var $option = $userSelect.children("option[value='" + receiverId + "']")
+          selectedReceiverIds.forEach(function(selectedReceiverId) {
+            var $option = $userSelect.children("option[value='" + selectedReceiverId + "']")
 
-        $option.remove();
-      })
+            $option.remove();
+          })
+
+          break;
+        }
+      }
 
       return $userSelect.get(0);
     }
+
     
     $('form').on('click', '.add-btn', function() {
       var $that = $(this);
+      var currentConfigsContainerId = $(this).closest('.configs').data('configs-container-id');
       
       $.get('/users')
         .then(generateUserSelect)
-        .then(removeExistingReceiverOptions)
+        .then((data) => removeExistingReceiverOptions(data, currentConfigsContainerId))
         .then(function( userSelect ) {
           var $userSelect = $(userSelect)
           $userSelect.insertBefore($that.closest('.row'));
@@ -61,20 +82,21 @@
         %h5.margin-top-0
           Outbound Event Settings
 
-      - GoogleCalendar.all.each_with_index do |google_cal, cal_idx|
-        %h6= google_cal.name
-        - @outbound_event_config_form.receiver_ids.each do |id|
+      - GoogleCalendar.all.each do |google_cal|
+        %div.configs{'data-configs-container-id' => google_cal.id}
+          %h6= google_cal.name
+          - @outbound_event_config_form.configs_for(google_calendar: google_cal).each do |config|
+            .row{'data-id': config.receiver.id}
+              = config.receiver.email
           .row
-            = User.find_by(id: id).email
-        .row
-          = form_with model: @outbound_event_config_form do |f|
-            = f.hidden_field :google_calendar_id, value: google_cal.id
-            - f.object.receiver_ids.each_index do |idx|
+            = form_with model: @outbound_event_config_form do |f|
+              = f.hidden_field :google_calendar_id, value: google_cal.id
               -#
-                .row
-                  = collection_select('', '', User.all, :id, :email, {include_blank: 'Select a receiver', selected: f.object.receiver_ids[idx]}, { name: 'outbound_event_config[receiver_ids][]', id: "outbound_event_config_form_#{google_cal.id}_receiver_id_#{idx}"})
+                - f.object.receiver_ids.each_index do |idx|
+                  .row
+                    = collection_select('', '', User.all, :id, :email, {include_blank: 'Select a receiver', selected: f.object.receiver_ids[idx]}, { name: 'outbound_event_config[receiver_ids][]', id: "outbound_event_config_form_#{google_cal.id}_receiver_id_#{idx}"})
 
-            .row
-              = f.submit 'Save', class: 'btn-small'
-              %btn.btn-small.add-btn{:id => "add_btn_#{google_cal.id}"}
-                Add
+              .row
+                = f.submit 'Save', class: 'btn-small'
+                %btn.btn-small.add-btn{:id => "add_btn_#{google_cal.id}"}
+                  Add
