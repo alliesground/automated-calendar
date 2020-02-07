@@ -22,35 +22,32 @@
     }
 
     /* populating configured receivers */
-    var allSelectedReceiverIds = {}
+    var configs = {
+      byId: {}
+    }
 
     $('.configs').each(function() {
+      var configsContainerId = $(this).data('configs-container-id');
 
-      allSelectedReceiverIds[$(this).data('configs-container-id')] = $(this).children('[data-id]').map(function(i, ele) {
-        return $(ele).data('id')
+      var receiverIds = $(this).children('[data-id]').map(function(i, ele) {
+        return {receiverId: $(ele).data('id')}
       })
       .get()
+
+      configs.byId[configsContainerId] = receiverIds
     });
-    console.log(allSelectedReceiverIds);
-    console.log('Entries: ', Object.entries(allSelectedReceiverIds))
+
+    console.log('Configs: ', configs.byId)
 
     /* Filtering out selected users */
     const removeExistingReceiverOptions = (userSelect, currentConfigsContainerId) => {
       var $userSelect = $(userSelect);
-      
-      for([configsContainerId, selectedReceiverIds] of Object.entries(allSelectedReceiverIds)) {
-        
-        if(currentConfigsContainerId == configsContainerId) {
 
-          selectedReceiverIds.forEach(function(selectedReceiverId) {
-            var $option = $userSelect.children("option[value='" + selectedReceiverId + "']")
+      configs.byId[currentConfigsContainerId].forEach(function(config) {
+        var $option = $userSelect.children("option[value='" + config.receiverId + "']")
 
-            $option.remove();
-          })
-
-          break;
-        }
-      }
+        $option.remove();
+      })
 
       return $userSelect.get(0);
     }
