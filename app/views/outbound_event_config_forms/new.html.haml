@@ -22,34 +22,41 @@
     }
 
     /* populating configured receivers */
-    var configs = { byId: {} }
+    /*
+    var configs = {
+      1: {
+        1: {receiverId: 1}, 
+        2: {receiverId: 2}
+      }
+    }*/
+
+    var configs = {}
 
     $('.configs').each(function() {
       var configsContainerId = $(this).data('configs-container-id');
 
-      var receiverIds = $(this).children('[data-id]').map(function(i, ele) {
-        return {receiverId: $(ele).data('id')}
-      })
-      .get()
+      configs[configsContainerId] = {}
 
-      configs.byId[configsContainerId] = receiverIds
+      $(this).children('[data-id]').each(function(i, ele) {
+        configs[configsContainerId][$(ele).data('id')] = {receiverId: $(ele).data('id')}
+
+        console.log('C: ', configs);
+      })
     });
 
-    console.log('Configs: ', configs.byId)
+    console.log('Configs: ', configs)
 
     /* Filtering out selected users */
     const removeExistingReceiverOptions = (userSelect, currentConfigsContainerId) => {
       var $userSelect = $(userSelect);
 
-      configs.byId[currentConfigsContainerId].forEach(function(config) {
+      for(config of Object.values(configs[currentConfigsContainerId])) {
         var $option = $userSelect.children("option[value='" + config.receiverId + "']")
-
         $option.remove();
-      })
+      }
 
       return $userSelect.get(0);
     }
-
     
     $('form').on('click', '.add-btn', function() {
       var $that = $(this);
@@ -64,8 +71,8 @@
           $userSelect.formSelect();
 
           $that.closest('.row').prev('.select-wrapper').wrap("<div class='row'></div>");
+          return $userSelect;
         })
-
     });
   });
   
