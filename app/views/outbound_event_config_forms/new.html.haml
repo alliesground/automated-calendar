@@ -39,12 +39,8 @@
 
       $(this).children('[data-id]').each(function(i, ele) {
         configs[configsContainerId][$(ele).data('id')] = {receiverId: $(ele).data('id')}
-
-        console.log('C: ', configs);
       })
     });
-
-    console.log('Configs: ', configs)
 
     /* Filtering out selected users */
     const removeExistingReceiverOptions = (userSelect, currentConfigsContainerId) => {
@@ -52,10 +48,10 @@
 
       for(config of Object.values(configs[currentConfigsContainerId])) {
         var $option = $userSelect.children("option[value='" + config.receiverId + "']")
-        $option.remove();
+        if(!$option.is(':selected')) $option.remove();
       }
 
-      return $userSelect.get(0);
+      return $userSelect;
     }
     
     $('form').on('click', '.add-btn', function() {
@@ -65,13 +61,26 @@
       $.get('/users')
         .then(generateUserSelect)
         .then((data) => removeExistingReceiverOptions(data, currentConfigsContainerId))
-        .then(function( userSelect ) {
-          var $userSelect = $(userSelect)
+        .then(function( $userSelect ) {
           $userSelect.insertBefore($that.closest('.row'));
           $userSelect.formSelect();
 
           $that.closest('.row').prev('.select-wrapper').wrap("<div class='row'></div>");
           return $userSelect;
+        })
+        .then(function($userSelect) {
+          $userSelect.on('change', function() {
+            configs[currentConfigsContainerId][$(this).val()] = {receiverId: $(this).val()};
+
+            $siblingSelectWrappers = $userSelect.parents('.row:first').siblings('div.row').not('div.row:last')
+
+            $siblingSelectWrappers.each(function() {
+              var $newSelect = removeExistingReceiverOptions($(this).find('select').get(0), currentConfigsContainerId);
+
+              $(this).find('select').replaceWith($newSelect).formSelect();
+            });
+
+          })
         })
     });
   });
