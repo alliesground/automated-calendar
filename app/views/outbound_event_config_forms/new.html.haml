@@ -70,16 +70,19 @@
         })
         .then(function($userSelect) {
           $userSelect.on('change', function() {
-            configs[currentConfigsContainerId][$(this).val()] = {receiverId: $(this).val()};
+            // add to configs as configured option
+            if($(this).val()) {
+              configs[currentConfigsContainerId][$(this).val()] = {receiverId: $(this).val()};
+            }
 
             $siblingSelectWrappers = $userSelect.parents('.row:first').siblings('div.row').not('div.row:last')
 
+            // update sibling select's options
             $siblingSelectWrappers.each(function() {
               var $newSelect = removeExistingReceiverOptions($(this).find('select').get(0), currentConfigsContainerId);
 
               $(this).find('select').replaceWith($newSelect).formSelect();
             });
-
           })
         })
     });
