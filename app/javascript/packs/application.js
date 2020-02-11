@@ -9,6 +9,7 @@ require("@rails/activestorage").start()
 require("channels")
 require("packs/init_form_materialize")
 require("packs/flash_message")
+require("packs/outbound_event_config_form")
 
 
 // Uncomment to copy all static images under ../images to the output folder and reference
