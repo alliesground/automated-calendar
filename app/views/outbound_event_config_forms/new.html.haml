@@ -21,6 +21,10 @@
       return userSelect;
     }
 
+    const cacheSelectedReceiver = (configsContainerId, receiverId) => {
+      configs[configsContainerId][receiverId] = {receiverId: receiverId}
+    }
+
     var configs = {}
 
     $('.configs').each(function() {
@@ -29,12 +33,13 @@
       configs[configsContainerId] = {}
 
       $(this).children('[data-id]').each(function(i, ele) {
-        configs[configsContainerId][$(ele).data('id')] = {receiverId: $(ele).data('id')}
+        cacheSelectedReceiver(configsContainerId, $(this).data('id'));
+        //configs[configsContainerId][$(ele).data('id')] = {receiverId: $(ele).data('id')}
       })
     });
 
     /* Filtering out selected users */
-    const removeExistingReceiverOptions = (userSelect, currentConfigsContainerId) => {
+    const removeSelectedReceiverOptions = (userSelect, currentConfigsContainerId) => {
       var $userSelect = $(userSelect);
 
       for(config of Object.values(configs[currentConfigsContainerId])) {
@@ -51,7 +56,7 @@
       
       $.get('/users')
         .then(generateUserSelect)
-        .then((data) => removeExistingReceiverOptions(data, currentConfigsContainerId))
+        .then((userSelect) => removeSelectedReceiverOptions(userSelect, currentConfigsContainerId))
         .then(function( $userSelect ) {
           $userSelect.insertBefore($that.closest('.row'));
           $userSelect.formSelect();
@@ -68,16 +73,17 @@
             // remove previous selected option from configs
             delete configs[currentConfigsContainerId][previousSelectedVal]
 
-            var $siblingSelectWrappers = $userSelect.parents('.row:first').siblings('div.row').not('div.row:last');
-          
-            // add to configs as configured option
+            // add new selected option to configs
             if($(this).val()) {
-              configs[currentConfigsContainerId][$(this).val()] = {receiverId: $(this).val()};
+              cacheSelectedReceiver(currentConfigsContainerId, $(this).val())
+              //configs[currentConfigsContainerId][$(this).val()] = {receiverId: $(this).val()};
             }
+
+            var $siblingSelectWrappers = $userSelect.parents('.row:first').siblings('div.row').not('div.row:last');
 
             // update sibling select's options
             $siblingSelectWrappers.each(function() {
-              var $newSelect = removeExistingReceiverOptions($(this).find('select').get(0), currentConfigsContainerId);
+              var $newSelect = removeSelectedReceiverOptions($(this).find('select').get(0), currentConfigsContainerId);
               
               if(previousSelectedVal) {
                 $newSelect.append(new Option(previousSelectedText, previousSelectedVal));
@@ -88,6 +94,7 @@
 
             previousSelectedVal = $(this).val();
             previousSelectedText = $(this).find('option:selected').text();
+            console.log('configs: ', configs)
           })
         })
     });
