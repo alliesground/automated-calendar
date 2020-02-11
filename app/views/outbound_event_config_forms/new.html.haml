@@ -21,15 +21,6 @@
       return userSelect;
     }
 
-    /* populating configured receivers */
-    /*
-    var configs = {
-      1: {
-        1: {receiverId: 1}, 
-        2: {receiverId: 2}
-      }
-    }*/
-
     var configs = {}
 
     $('.configs').each(function() {
@@ -69,20 +60,34 @@
           return $userSelect;
         })
         .then(function($userSelect) {
+          var previousSelectedVal = $userSelect.val();
+          var previousSelectedText = $userSelect.find('option:selected').text();
+
           $userSelect.on('change', function() {
+            var $that = $(this);
+            // remove previous selected option from configs
+            delete configs[currentConfigsContainerId][previousSelectedVal]
+
+            var $siblingSelectWrappers = $userSelect.parents('.row:first').siblings('div.row').not('div.row:last');
+          
             // add to configs as configured option
             if($(this).val()) {
               configs[currentConfigsContainerId][$(this).val()] = {receiverId: $(this).val()};
             }
 
-            $siblingSelectWrappers = $userSelect.parents('.row:first').siblings('div.row').not('div.row:last')
-
             // update sibling select's options
             $siblingSelectWrappers.each(function() {
               var $newSelect = removeExistingReceiverOptions($(this).find('select').get(0), currentConfigsContainerId);
+              
+              if(previousSelectedVal) {
+                $newSelect.append(new Option(previousSelectedText, previousSelectedVal));
+              }
 
               $(this).find('select').replaceWith($newSelect).formSelect();
             });
+
+            previousSelectedVal = $(this).val();
+            previousSelectedText = $(this).find('option:selected').text();
           })
         })
     });
