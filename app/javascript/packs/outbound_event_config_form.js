@@ -1,6 +1,7 @@
 import 'materialize-css/dist/js/materialize';
 
-$(function() {
+$(document).on('turbolinks:load', function() {
+
   const generateUserSelect = (users) => {
 
     var userSelect = document.createElement('select');
@@ -66,6 +67,9 @@ $(function() {
       .then(function($userSelect) {
         var previousSelectedVal = $userSelect.val();
         var previousSelectedText = $userSelect.find('option:selected').text();
+        $userSelect.parents('form:first').on('change', $userSelect, function() {
+          console.log('Still Alive');
+        })
 
         $userSelect.on('change', function() {
           var $that = $(this);
