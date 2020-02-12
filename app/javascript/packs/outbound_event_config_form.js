@@ -1,3 +1,4 @@
+import 'materialize-css/dist/js/materialize';
 
 $(function() {
   const generateUserSelect = (users) => {
@@ -40,7 +41,7 @@ $(function() {
   const removeSelectedReceiverOptions = (userSelect, currentConfigsContainerId) => {
     var $userSelect = $(userSelect);
 
-    for(config of Object.values(configs[currentConfigsContainerId])) {
+    for(const config of Object.values(configs[currentConfigsContainerId])) {
       var $option = $userSelect.children("option[value='" + config.receiverId + "']")
       if(!$option.is(':selected')) $option.remove();
     }
