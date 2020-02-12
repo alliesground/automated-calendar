@@ -67,9 +67,6 @@ $(document).on('turbolinks:load', function() {
       .then(function($userSelect) {
         var previousSelectedVal = $userSelect.val();
         var previousSelectedText = $userSelect.find('option:selected').text();
-        $userSelect.parents('form:first').on('change', $userSelect, function() {
-          console.log('Still Alive');
-        })
 
         $userSelect.on('change', function() {
           var $that = $(this);
@@ -81,7 +78,7 @@ $(document).on('turbolinks:load', function() {
             cacheSelectedReceiver(currentConfigsContainerId, $(this).val())
           }
 
-          var $siblingSelectWrappers = $userSelect.parents('.row:first').siblings('div.row').not('div.row:last');
+          var $siblingSelectWrappers = $(this).parents('.row:first').siblings('div.row').not('div.row:last');
 
           // update sibling select's options
           $siblingSelectWrappers.each(function() {
