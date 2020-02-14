@@ -58,10 +58,17 @@ $(document).on('turbolinks:load', function() {
       .then(generateUserSelect)
       .then((userSelect) => removeSelectedReceiverOptions(userSelect, currentConfigsContainerId))
       .then(function( $userSelect ) {
-        $userSelect.insertBefore($that.closest('.row'));
+
+        var $form = $that.parents('.configs form');
+
+        $("<div class='row'><div class='col s12'></div></div>")
+          .find('div.col')
+          .html($userSelect)
+          .parents()
+          .insertBefore($form.find('.row:last'));
+
         $userSelect.formSelect();
 
-        $that.closest('.row').prev('.select-wrapper').wrap("<div class='row'></div>");
         return $userSelect;
       })
       .then(function($userSelect) {
@@ -78,17 +85,18 @@ $(document).on('turbolinks:load', function() {
             cacheSelectedReceiver(currentConfigsContainerId, $(this).val())
           }
 
-          var $siblingSelectWrappers = $(this).parents('.row:first').siblings('div.row').not('div.row:last');
+          var $siblingSelects = $(this).parents('.row:first').siblings().find('select');
+          console.log('Select: ', $(this).parents('.row:first').siblings().find('select'));
 
           // update sibling select's options
-          $siblingSelectWrappers.each(function() {
-            var $newSelect = removeSelectedReceiverOptions($(this).find('select').get(0), currentConfigsContainerId);
+          $siblingSelects.each(function() {
+            var $newSelect = removeSelectedReceiverOptions($(this).get(0), currentConfigsContainerId);
 
             if(previousSelectedVal) {
               $newSelect.append(new Option(previousSelectedText, previousSelectedVal));
             }
 
-            $(this).find('select').replaceWith($newSelect).formSelect();
+            $(this).replaceWith($newSelect).formSelect();
           });
 
           previousSelectedVal = $(this).val();
