@@ -2,6 +2,18 @@ import 'materialize-css/dist/js/materialize';
 
 $(document).on('turbolinks:load', function() {
 
+  var configs = {}
+
+  $('.configs').each(function() {
+    var configsContainerId = $(this).data('configs-container-id');
+
+    configs[configsContainerId] = {}
+
+    $(this).children('[data-id]').each(function(i, ele) {
+      cacheSelectedReceiver(configsContainerId, $(this).data('id'));
+    })
+  });
+
   const generateUserSelect = (users) => {
 
     var userSelect = document.createElement('select');
@@ -26,18 +38,6 @@ $(document).on('turbolinks:load', function() {
     configs[configsContainerId][receiverId] = {receiverId: receiverId}
   }
 
-  var configs = {}
-
-  $('.configs').each(function() {
-    var configsContainerId = $(this).data('configs-container-id');
-
-    configs[configsContainerId] = {}
-
-    $(this).children('[data-id]').each(function(i, ele) {
-      cacheSelectedReceiver(configsContainerId, $(this).data('id'));
-    })
-  });
-
   /* Filtering out selected users */
   const removeSelectedReceiverOptions = (userSelect, currentConfigsContainerId) => {
     var $userSelect = $(userSelect);
@@ -50,6 +50,26 @@ $(document).on('turbolinks:load', function() {
     return $userSelect;
   }
 
+  const insert = ($userSelect, targetConfigsContainerId) => {
+    var $targetConfigsContainer = 
+      $('[data-configs-container-id="' + 
+        targetConfigsContainerId +'"]');
+
+    console.log('cont: ', $targetConfigsContainer);
+
+    $("<div class='row'><div class='col s12'></div></div>")
+      .find('div.col')
+      .html($userSelect)
+      .parents()
+      .insertBefore(
+        $targetConfigsContainer.find('form .row:last')
+      );
+
+    $userSelect.formSelect();
+
+    return $userSelect;
+  }
+
   $('form').on('click', '.add-btn', function() {
     var $that = $(this);
     var currentConfigsContainerId = $(this).closest('.configs').data('configs-container-id');
@@ -57,20 +77,7 @@ $(document).on('turbolinks:load', function() {
     $.get('/users')
       .then(generateUserSelect)
       .then((userSelect) => removeSelectedReceiverOptions(userSelect, currentConfigsContainerId))
-      .then(function( $userSelect ) {
-
-        var $form = $that.parents('.configs form');
-
-        $("<div class='row'><div class='col s12'></div></div>")
-          .find('div.col')
-          .html($userSelect)
-          .parents()
-          .insertBefore($form.find('.row:last'));
-
-        $userSelect.formSelect();
-
-        return $userSelect;
-      })
+      .then(($userSelect) => insert($userSelect, currentConfigsContainerId))
       .then(function($userSelect) {
         var previousSelectedVal = $userSelect.val();
         var previousSelectedText = $userSelect.find('option:selected').text();
