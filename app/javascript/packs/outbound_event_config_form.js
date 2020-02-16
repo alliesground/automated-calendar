@@ -114,7 +114,12 @@ $(document).on('turbolinks:load', function() {
     return userSelect;
   }
 
-  // const resetIdAttrs(userSelect, configsContainerId)
+  const resetIdAttrs = (configsContainerId) => {
+    var $configsContainer = $("[data-configs-container-id='" + configsContainerId + "']");
+    $configsContainer.find('select').each(function(idx) {
+      $(this).attr('id', 'outbound_event_config_' + configsContainerId + '_receiver_id_' + idx)
+    });
+  }
 
   $('form').on('click', '.add-btn', function() {
     var $that = $(this);
@@ -149,11 +154,11 @@ $(document).on('turbolinks:load', function() {
   $('form').on('click', '.cancel-config', function(e) {
     e.preventDefault();
 
+    var currentConfigsContainerId = $(this).closest('.configs').data('configs-container-id');
     var selectedVal = $(this).parents('.row:first').find('select').val();
     var selectedText = $(this).parents('.row:first').find('option:selected').text();
 
     if(selectedVal) {
-      var currentConfigsContainerId = $(this).closest('.configs').data('configs-container-id');
 
       removeFromConfigs(currentConfigsContainerId, selectedVal);
 
@@ -161,5 +166,6 @@ $(document).on('turbolinks:load', function() {
     }
 
     $(this).parents('.row:first').remove();
+    resetIdAttrs(currentConfigsContainerId);
   });
 });
