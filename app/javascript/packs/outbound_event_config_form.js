@@ -83,6 +83,22 @@ $(document).on('turbolinks:load', function() {
     return $userSelect;
   }
 
+  // update sibling selects option
+  const updateSiblingSelectsOption = ($sourceEle, optionVal, optionTxt) => {
+    var $siblingSelects = $sourceEle.parents('.row:first').siblings().find('select');
+    var currentConfigsContainerId = $sourceEle.closest('.configs').data('configs-container-id');
+
+    $siblingSelects.each(function() {
+      var $newSelect = removeSelectedReceiverOptions($(this).get(0), currentConfigsContainerId);
+
+      if(optionVal) {
+        $newSelect.append(new Option(optionTxt, optionVal));
+      }
+
+      $(this).replaceWith($newSelect).formSelect();
+    });
+  }
+
   $('form').on('click', '.add-btn', function() {
     var $that = $(this);
     var currentConfigsContainerId = $(this).closest('.configs').data('configs-container-id');
@@ -97,26 +113,14 @@ $(document).on('turbolinks:load', function() {
 
         $userSelect.on('change', function() {
           var $that = $(this);
-          // remove previous selected option from configs
+
           removeFromConfigs(currentConfigsContainerId, previousSelectedVal)
 
-          // add new selected option to configs
           if($(this).val()) {
             addToConfigs(currentConfigsContainerId, $(this).val())
           }
 
-          // update sibling's select options
-          var $siblingSelects = $(this).parents('.row:first').siblings().find('select');
-
-          $siblingSelects.each(function() {
-            var $newSelect = removeSelectedReceiverOptions($(this).get(0), currentConfigsContainerId);
-
-            if(previousSelectedVal) {
-              $newSelect.append(new Option(previousSelectedText, previousSelectedVal));
-            }
-
-            $(this).replaceWith($newSelect).formSelect();
-          });
+          updateSiblingSelectsOption($(this), previousSelectedVal, previousSelectedText);
 
           previousSelectedVal = $(this).val();
           previousSelectedText = $(this).find('option:selected').text();
@@ -135,18 +139,7 @@ $(document).on('turbolinks:load', function() {
 
       removeFromConfigs(currentConfigsContainerId, selectedVal);
 
-      // update sibling's select options
-      var $siblingSelects = $(this).parents('.row:first').siblings().find('select');
-
-      $siblingSelects.each(function() {
-        var $newSelect = removeSelectedReceiverOptions($(this).get(0), currentConfigsContainerId);
-
-        if(selectedVal) {
-          $newSelect.append(new Option(selectedText, selectedVal));
-        }
-
-        $(this).replaceWith($newSelect).formSelect();
-      });
+      updateSiblingSelectsOption($(this), selectedVal, selectedText);
     }
 
     $(this).parents('.row:first').remove();
