@@ -10,7 +10,7 @@ $(document).on('turbolinks:load', function() {
     configs[configsContainerId] = {}
 
     $(this).children('[data-id]').each(function(i, ele) {
-      cacheSelectedReceiver(configsContainerId, $(this).data('id'));
+      addToConfigs(configsContainerId, $(this).data('id'));
     })
   });
 
@@ -34,8 +34,8 @@ $(document).on('turbolinks:load', function() {
     return userSelect;
   }
 
-  const cacheSelectedReceiver = (configsContainerId, receiverId) => {
-    configs[configsContainerId][receiverId] = {receiverId: receiverId}
+  const addToConfigs = (configsContainerId, key) => {
+    configs[configsContainerId][key] = {receiverId: key}
   }
 
   const removeFromConfigs = (configsContainerId, key) => {
@@ -98,11 +98,11 @@ $(document).on('turbolinks:load', function() {
         $userSelect.on('change', function() {
           var $that = $(this);
           // remove previous selected option from configs
-          delete configs[currentConfigsContainerId][previousSelectedVal]
+          removeFromConfigs(currentConfigsContainerId, previousSelectedVal)
 
           // add new selected option to configs
           if($(this).val()) {
-            cacheSelectedReceiver(currentConfigsContainerId, $(this).val())
+            addToConfigs(currentConfigsContainerId, $(this).val())
           }
 
           // update sibling's select options
