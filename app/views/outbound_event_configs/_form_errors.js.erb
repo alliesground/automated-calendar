@@ -18,8 +18,6 @@ $('input').addClass('valid')
       "<%= escape_javascript(obj.errors[key][0].html_safe) %>"
     );
 
-  console.log('#' + klassName + '_<%= j(key) %>');
-
   $errorField.is('select') ?
     $errorField.siblings('input').addClass('invalid') :
     $errorField.addClass('invalid')
