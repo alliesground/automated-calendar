@@ -9,28 +9,34 @@
           %h5.margin-top-0
             Outbound Event Settings
 
-      - GoogleCalendar.all.each do |google_cal|
-        %div.configs{'data-configs-container-id' => google_cal.id}
-          %h6= google_cal.name
+      %ul.collapsible
+        - GoogleCalendar.all.each do |google_cal|
+          %li
+            .collapsible-header
+              %i.material-icons
+                today
+              = google_cal.name
 
-          = form_with model: @outbound_event_config_form do |f|
-            = f.hidden_field :google_calendar_id, value: google_cal.id
-            .row
-              .col.s12
-                %table
-                  %tbody
-                    - f.object.configs_for(google_calendar: google_cal).each do |config|
-                      %tr{'data-id': config.receiver.id}
-                        %td
-                          = config.receiver.email
-                    %tr
-                      %td
-                        coming soon...
-            .row          
-              .col.s12
-                = f.submit 'Save', class: 'btn-small'
-                %btn.btn-small.add-btn{:id => "add_btn_#{google_cal.id}"}
-                  Add
+            .collapsible-body
+              %div.configs{'data-configs-container-id' => google_cal.id}
+                = form_with model: @outbound_event_config_form do |f|
+                  = f.hidden_field :google_calendar_id, value: google_cal.id
+                  .row
+                    .col.s12
+                      %table
+                        %tbody
+                          - f.object.configs_for(google_calendar: google_cal).each do |config|
+                            %tr{'data-id': config.receiver.id}
+                              %td
+                                = config.receiver.email
+                          %tr
+                            %td
+                              coming soon...
+                  .row          
+                    .col.s12
+                      = f.submit 'Save', class: 'btn-small'
+                      %btn.btn-small.add-btn{:id => "add_btn_#{google_cal.id}"}
+                        Add
 
 = javascript_pack_tag 'outbound_event_config_form', 'data-turbolinks-track': 'reload'
   

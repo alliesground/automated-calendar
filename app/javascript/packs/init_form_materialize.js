@@ -21,6 +21,7 @@ document.addEventListener('turbolinks:load', function() {
     $(this).addClass('hide');
     $(this).parents('div.input-field').children('label').attr('data-hint', $value);
   });
+  $('.collapsible').collapsible();
 
   M.updateTextFields();
 });
