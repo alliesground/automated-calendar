@@ -18,8 +18,6 @@ $(document).on('turbolinks:load', function() {
     })
   });
 
-  console.log('configs: ', configs);
-
   const generateUserSelect = (users) => {
 
     var userSelect = document.createElement('select');

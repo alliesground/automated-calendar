@@ -12,7 +12,7 @@ class OutboundEventConfigForm
 
   def initialize(params={}, user: nil)
     super(params)
-    @receiver_ids ||= [1,2]
+    @receiver_ids ||= []
     @user = user
   end
 
