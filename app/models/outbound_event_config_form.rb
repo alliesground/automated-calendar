@@ -6,9 +6,9 @@ class OutboundEventConfigForm
 
   validate :receiver_ids_presence
 
-#  def self.model_name
-#    ActiveModel::Name.new(self, nil, 'OutboundEventConfig')
-#  end
+  def self.model_name
+    ActiveModel::Name.new(self, nil, 'OutboundEventConfig')
+  end
 
   def initialize(params={}, user: nil)
     super(params)

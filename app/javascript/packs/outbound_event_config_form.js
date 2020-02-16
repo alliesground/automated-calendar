@@ -108,7 +108,7 @@ $(document).on('turbolinks:load', function() {
 
     userSelect.setAttribute(
       'id', 
-      'outbound_event_config_' + configsContainerId + '_receiver_id_' + selectCount
+      'outbound_event_config_form_' + configsContainerId + '_receiver_id_' + selectCount
     );
 
     return userSelect;
@@ -117,7 +117,7 @@ $(document).on('turbolinks:load', function() {
   const resetIdAttrs = (configsContainerId) => {
     var $configsContainer = $("[data-configs-container-id='" + configsContainerId + "']");
     $configsContainer.find('select').each(function(idx) {
-      $(this).attr('id', 'outbound_event_config_' + configsContainerId + '_receiver_id_' + idx)
+      $(this).attr('id', 'outbound_event_config_form_' + configsContainerId + '_receiver_id_' + idx)
     });
   }
 

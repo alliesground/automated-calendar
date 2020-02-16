@@ -1,62 +1,42 @@
-:javascript
-
-  $(function(){
-    var selectedReceiverIds = [1, 2]
-
-    $('form').on('click', '.add-btn', function(){
-
-      /* Destroying materializecss selectbox instance */
-      $('select').formSelect('destroy')
-
-      var $selectWrapperRow = $(this)
-                                .closest('.row')
-                                .prev('.row')
-                                .clone()
-
-      var $receiverSelect = $selectWrapperRow.find('select')
-
-      /* Generating dynamic Id for new dynamic select box */
-      var id = $receiverSelect.attr('id')
-      var newIdLastChar = parseInt(id.charAt(id.length - 1)) + 1
-      var newId = id.slice(0, -1) + newIdLastChar.toString()
-
-      $receiverSelect.attr('id', newId)
-
-      $receiverSelect.children('option:selected').removeAttr('selected')
-
-      /* Filtering out selected users */
-      selectedReceiverIds.forEach(function(receiverId) {
-        var $option = $receiverSelect.children("option[value='" + receiverId + "']")
-        $option.remove();
-      })
-
-      $selectWrapperRow.insertBefore($(this).closest('.row'));
-
-      $('select').formSelect();
-
-    })
-
-  })
-  
+- content_for :turbolink_full_reload do
+  %meta{:name => 'turbolinks-visit-control', :content => 'reload'}
 
 .container.content-holder
   .row
     .col.s12
       .row
-        %h5.margin-top-0
-          Outbound Event Settings
+        .col.s12
+          %h5.margin-top-0
+            Outbound Event Settings
 
-      - GoogleCalendar.all.each_with_index do |google_cal, cal_idx|
-        %h6= google_cal.name
-        .row
-          = form_with model: @outbound_event_config_form do |f|
-            = f.hidden_field :google_calendar_id, value: google_cal.id
-            - f.object.receiver_ids.each_index do |idx|
-              .row
-                = collection_select('', '', User.all, :id, :email, {include_blank: 'Select a receiver', selected: f.object.receiver_ids[idx]}, { name: 'outbound_event_config[receiver_ids][]', id: "outbound_event_config_form_#{google_cal.id}_receiver_id_#{idx}"})
+      %ul.collapsible
+        - GoogleCalendar.all.each do |google_cal|
+          %li
+            .collapsible-header
+              %i.material-icons
+                today
+              = google_cal.name
 
-            .row
-              = f.submit 'Save', class: 'btn-small'
-              %btn.btn-small.add-btn{:id => "add_btn_#{google_cal.id}"}
-                Add
+            .collapsible-body
+              %div.configs{'data-configs-container-id' => google_cal.id}
+                = form_with model: @outbound_event_config_form do |f|
+                  = f.hidden_field :google_calendar_id, value: google_cal.id
+                  .row
+                    .col.s12
+                      %table
+                        %tbody
+                          - f.object.configs_for(google_calendar: google_cal).each do |config|
+                            %tr{'data-id': config.receiver.id}
+                              %td
+                                = config.receiver.email
+                          %tr
+                            %td
+                              coming soon...
+                  .row          
+                    .col.s12
+                      = f.submit 'Save', class: 'btn-small'
+                      %btn.btn-small.add-btn{:id => "add_btn_#{google_cal.id}"}
+                        Add
 
+= javascript_pack_tag 'outbound_event_config_form', 'data-turbolinks-track': 'reload'
+  

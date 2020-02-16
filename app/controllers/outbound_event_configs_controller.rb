@@ -1,5 +1,7 @@
 class OutboundEventConfigsController < ApplicationController
-  def new; end
+  def new
+    @outbound_event_config_form = OutboundEventConfigForm.new
+  end
 
   def create
     @outbound_event_config_form = OutboundEventConfigForm.new(outbound_event_config_params, user: current_user)
