@@ -143,6 +143,5 @@ $(document).on('turbolinks:load', function() {
     }
 
     $(this).parents('.row:first').remove();
-    console.log('canceled')
   });
 });
