@@ -55,10 +55,17 @@ $(document).on('turbolinks:load', function() {
       $('[data-configs-container-id="' + 
         targetConfigsContainerId +'"]');
 
-    console.log('cont: ', $targetConfigsContainer);
-
-    $("<div class='row'><div class='col s12'></div></div>")
-      .find('div.col')
+    $(
+      `
+        <div class='row valign-wrapper'>
+          <div class='col s11'></div>
+          <div class='col s1 right-align'>
+            <a href='#' style='color: red'><i class='small material-icons'>cancel</i></a>
+          </div>
+        </div>
+      `
+    )
+      .find('div.col:first')
       .html($userSelect)
       .parents()
       .insertBefore(
