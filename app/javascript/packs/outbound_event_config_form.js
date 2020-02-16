@@ -2,6 +2,10 @@ import 'materialize-css/dist/js/materialize';
 
 $(document).on('turbolinks:load', function() {
 
+  const addToConfigs = (configsContainerId, key) => {
+    configs[configsContainerId][key] = {receiverId: key}
+  }
+
   var configs = {}
 
   $('.configs').each(function() {
@@ -9,10 +13,12 @@ $(document).on('turbolinks:load', function() {
 
     configs[configsContainerId] = {}
 
-    $(this).children('[data-id]').each(function(i, ele) {
+    $(this).find('[data-id]').each(function() {
       addToConfigs(configsContainerId, $(this).data('id'));
     })
   });
+
+  console.log('configs: ', configs);
 
   const generateUserSelect = (users) => {
 
@@ -33,10 +39,6 @@ $(document).on('turbolinks:load', function() {
     })
 
     return userSelect;
-  }
-
-  const addToConfigs = (configsContainerId, key) => {
-    configs[configsContainerId][key] = {receiverId: key}
   }
 
   const removeFromConfigs = (configsContainerId, key) => {
