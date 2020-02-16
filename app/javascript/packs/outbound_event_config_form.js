@@ -38,6 +38,10 @@ $(document).on('turbolinks:load', function() {
     configs[configsContainerId][receiverId] = {receiverId: receiverId}
   }
 
+  const removeFromConfigs = (configsContainerId, key) => {
+    delete configs[configsContainerId][key]
+  }
+
   /* Filtering out selected users */
   const removeSelectedReceiverOptions = (userSelect, currentConfigsContainerId) => {
     var $userSelect = $(userSelect);
@@ -60,7 +64,9 @@ $(document).on('turbolinks:load', function() {
         <div class='row valign-wrapper'>
           <div class='col s11'></div>
           <div class='col s1 right-align'>
-            <a href='#' style='color: red'><i class='small material-icons'>cancel</i></a>
+            <a href='#' style='color: red' class='cancel-config'>
+              <i class='small material-icons'>cancel</i>
+            </a>
           </div>
         </div>
       `
@@ -99,10 +105,9 @@ $(document).on('turbolinks:load', function() {
             cacheSelectedReceiver(currentConfigsContainerId, $(this).val())
           }
 
+          // update sibling's select options
           var $siblingSelects = $(this).parents('.row:first').siblings().find('select');
-          console.log('Select: ', $(this).parents('.row:first').siblings().find('select'));
 
-          // update sibling select's options
           $siblingSelects.each(function() {
             var $newSelect = removeSelectedReceiverOptions($(this).get(0), currentConfigsContainerId);
 
@@ -117,5 +122,34 @@ $(document).on('turbolinks:load', function() {
           previousSelectedText = $(this).find('option:selected').text();
         })
       })
+  });
+
+  $('form').on('click', '.cancel-config', function(e) {
+    e.preventDefault();
+
+    var selectedVal = $(this).parents('.row:first').find('select').val();
+    var selectedText = $(this).parents('.row:first').find('option:selected').text();
+
+    if(selectedVal) {
+      var currentConfigsContainerId = $(this).closest('.configs').data('configs-container-id');
+
+      removeFromConfigs(currentConfigsContainerId, selectedVal);
+
+      // update sibling's select options
+      var $siblingSelects = $(this).parents('.row:first').siblings().find('select');
+
+      $siblingSelects.each(function() {
+        var $newSelect = removeSelectedReceiverOptions($(this).get(0), currentConfigsContainerId);
+
+        if(selectedVal) {
+          $newSelect.append(new Option(selectedText, selectedVal));
+        }
+
+        $(this).replaceWith($newSelect).formSelect();
+      });
+    }
+
+    $(this).parents('.row:first').remove();
+    console.log('canceled')
   });
 });
