@@ -122,7 +122,7 @@ $(document).on('turbolinks:load', function() {
 
     userSelect.setAttribute(
       'id', 
-      'outbound_event_config_form_' + configsContainerId + '_receiver_id_' + selectCount
+      'outbound_event_configs_form_' + configsContainerId + '_receiver_id_' + selectCount
     );
 
     return userSelect;

@@ -31,6 +31,6 @@ class OutboundEventConfigsController < ApplicationController
 
   def outbound_event_configs_form_params
     params.require(:outbound_event_configs_form).permit(
-      :google_calendar_id, receiver_ids: [], outbound_event_configs_attributes: [:receiver_id])
+      :google_calendar_id, outbound_event_configs_attributes: [:receiver_id])
   end
 end
