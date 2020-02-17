@@ -16,10 +16,6 @@ class OutboundEventConfigForm
     @user = user
   end
 
-  def configs_for(google_calendar:)
-    google_calendar.outbound_event_configs
-  end
-
   def user
     @user ||= User.new
   end

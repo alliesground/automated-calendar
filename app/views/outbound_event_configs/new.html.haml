@@ -25,7 +25,7 @@
                     .col.s12
                       %table
                         %tbody
-                          - f.object.configs_for(google_calendar: google_cal).each do |config|
+                          - google_cal.outbound_event_configs.each do |config|
                             %tr{'data-id': config.receiver.id}
                               %td
                                 = config.receiver.email
