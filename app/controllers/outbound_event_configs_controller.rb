@@ -1,23 +1,22 @@
 class OutboundEventConfigsController < ApplicationController
   def new
-    @outbound_event_config_form = OutboundEventConfigForm.new
+    @outbound_event_configs_form = OutboundEventConfigsForm.new
   end
 
   def create
-    @outbound_event_config_form = OutboundEventConfigForm.new(outbound_event_config_params, user: current_user)
+    @outbound_event_configs_form = OutboundEventConfigsForm.new(outbound_event_configs_form_params, user: current_user)
 
     respond_to do |format|
-      if @outbound_event_config_form.save
+      if @outbound_event_configs_form.save
         format.js do
-          flash.now[:notice] = 'configuration saved'
-          #redirect_to events_path
+          set_message('Configuration saved successfully')
         end
       else
         format.js do
           set_message('Please fill up the required fields')
 
           render partial: 'form_errors', 
-                 locals: {obj: @outbound_event_config_form},
+                 locals: {obj: @outbound_event_configs_form},
                  status: 400
         end
       end
@@ -30,8 +29,8 @@ class OutboundEventConfigsController < ApplicationController
     response.set_header('Message', msg)
   end
 
-  def outbound_event_config_params
-    params.require(:outbound_event_config).permit(
-      :google_calendar_id, receiver_ids: [])
+  def outbound_event_configs_form_params
+    params.require(:outbound_event_configs_form).permit(
+      :google_calendar_id, receiver_ids: [], outbound_event_configs_attributes: [:receiver_id])
   end
 end

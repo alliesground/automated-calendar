@@ -1,8 +1,11 @@
-class OutboundEventConfigForm
+class OutboundEventConfigsForm
   include ActiveModel::Model
 
-  attr_accessor :receiver_ids
-  attr_accessor :google_calendar_id
+  attr_accessor(
+    :receiver_ids,
+    :google_calendar_id,
+    :outbound_event_configs
+  )
 
   validate :receiver_ids_presence
 
@@ -14,10 +17,27 @@ class OutboundEventConfigForm
     super(params)
     @receiver_ids ||= []
     @user = user
+    @outbound_event_configs ||= []
+  end
+
+  def outbound_event_configs_attributes=(outbound_event_configs_params)
+    @outbound_event_configs ||= []
+
+    outbound_event_configs_params.each do |_i, outbound_event_config|
+      @outbound_event_configs << outbound_event_config
+    end
   end
 
   def user
     @user ||= User.new
+  end
+
+  def google_calendar
+    @google_calendar ||= GoogleCalendar.find_by(id: google_calendar_id)
+  end
+
+  def configs
+    google_calendar.outbound_event_configs
   end
 
   def save

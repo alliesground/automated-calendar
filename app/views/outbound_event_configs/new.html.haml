@@ -19,9 +19,9 @@
 
             .collapsible-body
               %div.configs{'data-configs-container-id' => google_cal.id}
-                = form_with model: @outbound_event_config_form do |f|
+                = form_with model: @outbound_event_configs_form, scope: :outbound_event_configs_form do |f|
                   = f.hidden_field :google_calendar_id, value: google_cal.id
-                  .row
+                  .row.existing-configs-holder
                     .col.s12
                       %table
                         %tbody
@@ -29,6 +29,10 @@
                             %tr{'data-id': config.receiver.id}
                               %td
                                 = config.receiver.email
+                  .row
+                    = f.fields_for :outbound_event_configs, f.object.outbound_event_configs do |ff|
+                      - ff.collection_select(:receiver_id, User.all, :id, :email)
+
                   .row          
                     .col.s12
                       = f.submit 'Save', class: 'btn-small'

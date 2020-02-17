@@ -21,7 +21,6 @@ $(document).on('turbolinks:load', function() {
   const generateUserSelect = (users) => {
 
     var userSelect = document.createElement('select');
-    userSelect.setAttribute('name', 'outbound_event_config[receiver_ids][]');
 
     var placeholder = document.createElement('option');
     placeholder.text = 'Please select a receiver';
@@ -55,7 +54,22 @@ $(document).on('turbolinks:load', function() {
     return $userSelect;
   }
 
+  const addNameAttr = (userSelect, configsContainerId) => {
+    var $configsContainer = $("[data-configs-container-id='" + configsContainerId + "']")
+
+    var selectCount = $configsContainer.find('select').length;
+
+    userSelect.setAttribute(
+      'name', 
+      'outbound_event_configs_form[outbound_event_configs_attributes]' + 
+        '[' + selectCount + '][receiver_id]'
+    );
+
+    return userSelect;
+  }
+
   const insert = ($userSelect, targetConfigsContainerId) => {
+
     var $targetConfigsContainer = 
       $('[data-configs-container-id="' + 
         targetConfigsContainerId +'"]');
@@ -121,6 +135,18 @@ $(document).on('turbolinks:load', function() {
     });
   }
 
+  const resetNameAttrs = (configsContainerId) => {
+    var $configsContainer = $("[data-configs-container-id='" + configsContainerId + "']");
+    $configsContainer.find('select').each(function(idx) {
+      $(this)
+        .attr(
+          'name', 
+          'outbound_event_configs_form[outbound_event_configs_attributes]' + 
+            '[' + idx + '][receiver_id]'
+        )
+    });
+  }
+
   $('form').on('click', '.add-btn', function() {
     var $that = $(this);
     var currentConfigsContainerId = $(this).closest('.configs').data('configs-container-id');
@@ -128,6 +154,7 @@ $(document).on('turbolinks:load', function() {
     $.get('/users')
       .then(generateUserSelect)
       .then((userSelect) => addIdAttr(userSelect, currentConfigsContainerId))
+      .then((userSelect) => addNameAttr(userSelect, currentConfigsContainerId))
       .then((userSelect) => removeSelectedReceiverOptions(userSelect, currentConfigsContainerId))
       .then(($userSelect) => insert($userSelect, currentConfigsContainerId))
       .then(function($userSelect) {
@@ -167,5 +194,6 @@ $(document).on('turbolinks:load', function() {
 
     $(this).parents('.row:first').remove();
     resetIdAttrs(currentConfigsContainerId);
+    resetNameAttrs(currentConfigsContainerId)
   });
 });
