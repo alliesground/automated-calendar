@@ -1,18 +1,14 @@
 
-/*
 var $existingConfigsHolder = 
-  $('ul.collapsible li.active .existing-configs-holder');
+  $('ul.collapsible li.active table tbody');
 
-$existingConfigsHolder.find('table tbody').append('<tr><td>hello</td></tr>')
-
-
-outbound_event_config_form.outbound_event_configs
-
-@outbound_event_config_form.configs do |config|
-  config.receiver_id
-add <tr>
-
-  $('<tr>')
-    .data('id', 1);
-
-*/
+<% @outbound_event_configs_form.outbound_event_configs
+  .each do |outbound_event_config| %>
+    $(
+      `
+        <tr data-id="<%= outbound_event_config.receiver_id %>">
+          <td><%= outbound_event_config.receiver.email %></td>
+        </tr>
+      `
+    ).appendTo($existingConfigsHolder);
+<% end %>

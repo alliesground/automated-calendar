@@ -1,151 +1,164 @@
 import 'materialize-css/dist/js/materialize';
 
-$(document).on('turbolinks:load', function() {
+var configs = {}
 
-  const addToConfigs = (configsContainerId, key) => {
-    configs[configsContainerId][key] = {receiverId: key}
-  }
+const addToConfigs = (configsContainerId, key) => {
+  configs[configsContainerId][key] = {receiverId: key}
+}
 
-  var configs = {}
-
+const initializeConfigs = () => {
   $('.configs').each(function() {
     var configsContainerId = $(this).data('configs-container-id');
-
     configs[configsContainerId] = {}
 
     $(this).find('[data-id]').each(function() {
-      addToConfigs(configsContainerId, $(this).data('id'));
-    })
+      var receiverId = $(this).data('id')
+
+      if(!configs[configsContainerId][receiverId]) {
+        addToConfigs(configsContainerId, receiverId);
+      }
+    });
   });
+}
 
-  const generateUserSelect = (users) => {
+$('.configs').each(function() {
+  var configsContainerId = $(this).data('configs-container-id');
 
-    var userSelect = document.createElement('select');
 
-    var placeholder = document.createElement('option');
-    placeholder.text = 'Please select a receiver';
-    placeholder.value = "";
-    placeholder.placeholder = true;
-    userSelect.appendChild(placeholder);
+});
 
-    users.forEach(function(user) {
-      userSelect.options[userSelect.options.length] = new Option(
-        user.email, 
-        user.id
-      )
-    })
+const generateUserSelect = (users) => {
 
-    return userSelect;
+  var userSelect = document.createElement('select');
+
+  var placeholder = document.createElement('option');
+  placeholder.text = 'Please select a receiver';
+  placeholder.value = "";
+  placeholder.placeholder = true;
+  userSelect.appendChild(placeholder);
+
+  users.forEach(function(user) {
+    userSelect.options[userSelect.options.length] = new Option(
+      user.email, 
+      user.id
+    )
+  })
+
+  return userSelect;
+}
+
+const removeFromConfigs = (configsContainerId, key) => {
+  delete configs[configsContainerId][key]
+}
+
+/* Filtering out selected users */
+const removeSelectedReceiverOptions = (userSelect, currentConfigsContainerId) => {
+  var $userSelect = $(userSelect);
+
+  for(const config of Object.values(configs[currentConfigsContainerId])) {
+    var $option = $userSelect.children("option[value='" + config.receiverId + "']")
+    if(!$option.is(':selected')) $option.remove();
   }
 
-  const removeFromConfigs = (configsContainerId, key) => {
-    delete configs[configsContainerId][key]
-  }
+  return $userSelect;
+}
 
-  /* Filtering out selected users */
-  const removeSelectedReceiverOptions = (userSelect, currentConfigsContainerId) => {
-    var $userSelect = $(userSelect);
+const addNameAttr = (userSelect, configsContainerId) => {
+  var $configsContainer = $("[data-configs-container-id='" + configsContainerId + "']")
 
-    for(const config of Object.values(configs[currentConfigsContainerId])) {
-      var $option = $userSelect.children("option[value='" + config.receiverId + "']")
-      if(!$option.is(':selected')) $option.remove();
+  var selectCount = $configsContainer.find('select').length;
+
+  userSelect.setAttribute(
+    'name', 
+    'outbound_event_configs_form[outbound_event_configs_attributes]' + 
+      '[' + selectCount + '][receiver_id]'
+  );
+
+  return userSelect;
+}
+
+const insert = ($userSelect, targetConfigsContainerId) => {
+
+  var $targetConfigsContainer = 
+    $('[data-configs-container-id="' + 
+      targetConfigsContainerId +'"]');
+
+  $(
+    `
+      <div class='row valign-wrapper'>
+        <div class='col s11'></div>
+        <div class='col s1 right-align'>
+          <a href='#' style='color: red' class='cancel-config'>
+            <i class='small material-icons'>cancel</i>
+          </a>
+        </div>
+      </div>
+    `
+  )
+    .find('div.col:first')
+    .html($userSelect)
+    .parents()
+    .insertBefore(
+      $targetConfigsContainer.find('form .row:last')
+    );
+
+  $userSelect.formSelect();
+
+  return $userSelect;
+}
+
+// update sibling selects option
+const updateSiblingSelectsOption = ($sourceEle, optionVal, optionTxt) => {
+  var $siblingSelects = $sourceEle.parents('.row:first').siblings().find('select');
+  var currentConfigsContainerId = $sourceEle.closest('.configs').data('configs-container-id');
+
+  $siblingSelects.each(function() {
+    var $newSelect = removeSelectedReceiverOptions($(this).get(0), currentConfigsContainerId);
+
+    if(optionVal) {
+      $newSelect.append(new Option(optionTxt, optionVal));
     }
 
-    return $userSelect;
-  }
+    $(this).replaceWith($newSelect).formSelect();
+  });
+}
 
-  const addNameAttr = (userSelect, configsContainerId) => {
-    var $configsContainer = $("[data-configs-container-id='" + configsContainerId + "']")
+const addIdAttr = (userSelect, configsContainerId) => {
+  var $configsContainer = $("[data-configs-container-id='" + configsContainerId + "']")
 
-    var selectCount = $configsContainer.find('select').length;
-
-    userSelect.setAttribute(
-      'name', 
-      'outbound_event_configs_form[outbound_event_configs_attributes]' + 
-        '[' + selectCount + '][receiver_id]'
-    );
-
-    return userSelect;
-  }
-
-  const insert = ($userSelect, targetConfigsContainerId) => {
-
-    var $targetConfigsContainer = 
-      $('[data-configs-container-id="' + 
-        targetConfigsContainerId +'"]');
-
-    $(
-      `
-        <div class='row valign-wrapper'>
-          <div class='col s11'></div>
-          <div class='col s1 right-align'>
-            <a href='#' style='color: red' class='cancel-config'>
-              <i class='small material-icons'>cancel</i>
-            </a>
-          </div>
-        </div>
-      `
-    )
-      .find('div.col:first')
-      .html($userSelect)
-      .parents()
-      .insertBefore(
-        $targetConfigsContainer.find('form .row:last')
-      );
-
-    $userSelect.formSelect();
-
-    return $userSelect;
-  }
-
-  // update sibling selects option
-  const updateSiblingSelectsOption = ($sourceEle, optionVal, optionTxt) => {
-    var $siblingSelects = $sourceEle.parents('.row:first').siblings().find('select');
-    var currentConfigsContainerId = $sourceEle.closest('.configs').data('configs-container-id');
-
-    $siblingSelects.each(function() {
-      var $newSelect = removeSelectedReceiverOptions($(this).get(0), currentConfigsContainerId);
-
-      if(optionVal) {
-        $newSelect.append(new Option(optionTxt, optionVal));
-      }
-
-      $(this).replaceWith($newSelect).formSelect();
-    });
-  }
-
-  const addIdAttr = (userSelect, configsContainerId) => {
-    var $configsContainer = $("[data-configs-container-id='" + configsContainerId + "']")
-
-    var selectCount = $configsContainer.find('select').length;
+  var selectCount = $configsContainer.find('select').length;
 
 
-    userSelect.setAttribute(
-      'id', 
-      'outbound_event_configs_form_' + configsContainerId + '_receiver_id_' + selectCount
-    );
+  userSelect.setAttribute(
+    'id', 
+    'outbound_event_configs_form_' + configsContainerId + '_receiver_id_' + selectCount
+  );
 
-    return userSelect;
-  }
+  return userSelect;
+}
 
-  const resetIdAttrs = (configsContainerId) => {
-    var $configsContainer = $("[data-configs-container-id='" + configsContainerId + "']");
-    $configsContainer.find('select').each(function(idx) {
-      $(this).attr('id', 'outbound_event_config_form_' + configsContainerId + '_receiver_id_' + idx)
-    });
-  }
+const resetIdAttrs = (configsContainerId) => {
+  var $configsContainer = $("[data-configs-container-id='" + configsContainerId + "']");
+  $configsContainer.find('select').each(function(idx) {
+    $(this).attr('id', 'outbound_event_config_form_' + configsContainerId + '_receiver_id_' + idx)
+  });
+}
 
-  const resetNameAttrs = (configsContainerId) => {
-    var $configsContainer = $("[data-configs-container-id='" + configsContainerId + "']");
-    $configsContainer.find('select').each(function(idx) {
-      $(this)
-        .attr(
-          'name', 
-          'outbound_event_configs_form[outbound_event_configs_attributes]' + 
-            '[' + idx + '][receiver_id]'
-        )
-    });
-  }
+const resetNameAttrs = (configsContainerId) => {
+  var $configsContainer = $("[data-configs-container-id='" + configsContainerId + "']");
+  $configsContainer.find('select').each(function(idx) {
+    $(this)
+      .attr(
+        'name', 
+        'outbound_event_configs_form[outbound_event_configs_attributes]' + 
+          '[' + idx + '][receiver_id]'
+      )
+  });
+}
+
+$(document).on('turbolinks:load', function() {
+
+  initializeConfigs();
 
   $('form').on('click', '.add-btn', function() {
     var $that = $(this);
@@ -155,6 +168,10 @@ $(document).on('turbolinks:load', function() {
       .then(generateUserSelect)
       .then((userSelect) => addIdAttr(userSelect, currentConfigsContainerId))
       .then((userSelect) => addNameAttr(userSelect, currentConfigsContainerId))
+      .then((userSelect) => {
+        initializeConfigs();
+        return userSelect;
+      })
       .then((userSelect) => removeSelectedReceiverOptions(userSelect, currentConfigsContainerId))
       .then(($userSelect) => insert($userSelect, currentConfigsContainerId))
       .then(function($userSelect) {
