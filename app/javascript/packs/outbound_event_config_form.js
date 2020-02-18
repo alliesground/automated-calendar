@@ -140,7 +140,7 @@ const addIdAttr = (userSelect, configsContainerId) => {
 const resetIdAttrs = (configsContainerId) => {
   var $configsContainer = $("[data-configs-container-id='" + configsContainerId + "']");
   $configsContainer.find('select').each(function(idx) {
-    $(this).attr('id', 'outbound_event_config_form_' + configsContainerId + '_receiver_id_' + idx)
+    $(this).attr('id', 'outbound_event_configs_form_' + configsContainerId + '_receiver_id_' + idx)
   });
 }
 
