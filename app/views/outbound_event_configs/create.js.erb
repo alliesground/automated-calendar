@@ -12,3 +12,5 @@ var $existingConfigsHolder =
       `
     ).appendTo($existingConfigsHolder);
 <% end %>
+
+$existingConfigsHolder.parents('div.row:first').siblings('div.row').not(':last').remove();
