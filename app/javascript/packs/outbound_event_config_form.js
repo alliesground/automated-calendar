@@ -156,6 +156,14 @@ const resetNameAttrs = (configsContainerId) => {
   });
 }
 
+const enableSubmit  = ($that) => {
+  $that.siblings(':submit').removeClass('disabled');
+}
+
+const disableSubmit = ($that) => {
+  $that.parents('.row:first').siblings('.row:last').find(':submit').addClass('disabled');
+}
+
 $(document).on('turbolinks:load', function() {
 
   initializeConfigs();
@@ -193,10 +201,14 @@ $(document).on('turbolinks:load', function() {
           previousSelectedText = $(this).find('option:selected').text();
         })
       })
+      .then(enableSubmit($that))
   });
 
   $('form').on('click', '.cancel-config', function(e) {
     e.preventDefault();
+
+    var selects = $(this).parents('.row:first').siblings().find('select');
+    if(!selects.length) disableSubmit($(this));
 
     var currentConfigsContainerId = $(this).closest('.configs').data('configs-container-id');
     var selectedVal = $(this).parents('.row:first').find('select').val();
@@ -211,6 +223,6 @@ $(document).on('turbolinks:load', function() {
 
     $(this).parents('.row:first').remove();
     resetIdAttrs(currentConfigsContainerId);
-    resetNameAttrs(currentConfigsContainerId)
+    resetNameAttrs(currentConfigsContainerId);
   });
 });
