@@ -14,7 +14,7 @@ Rails.application.routes.draw do
 
   resources :events
 
-  resources :outbound_event_configs, only: [:new, :create]
+  resources :outbound_event_configs, only: [:new, :create, :destroy]
 
   resources :users, only: :index
 end

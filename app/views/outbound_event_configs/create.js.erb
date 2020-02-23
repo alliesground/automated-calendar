@@ -6,11 +6,19 @@ var $existingConfigsHolder =
   .each do |outbound_event_config| %>
     $(
       `
-        <tr data-id="<%= outbound_event_config.receiver_id %>">
-          <td><%= outbound_event_config.receiver.email %></td>
+        <tr data-config-id="<%= outbound_event_config.id %>">
+          <td data-config-receiver-id="<%= outbound_event_config.receiver_id %>">
+            <%= outbound_event_config.receiver.email %>
+          </td>
         </tr>
       `
     ).appendTo($existingConfigsHolder);
 <% end %>
 
-$existingConfigsHolder.parents('div.row:first').siblings('div.row').not(':last').remove();
+/* removing new config rows */
+$existingConfigsHolder
+  .parents('div.row:first')
+  .siblings('.new-configs-holder')
+  .children('div.col:first')
+  .children()
+  .remove();

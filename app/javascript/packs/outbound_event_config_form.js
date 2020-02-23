@@ -1,31 +1,42 @@
 import 'materialize-css/dist/js/materialize';
 
-var configs = {}
+let configsContainers = {}
 
-const addToConfigs = (configsContainerId, key) => {
-  configs[configsContainerId][key] = {receiverId: key}
-}
+const initializeSelectedReceiversFor = ($configsContainer) => {
 
-const initializeConfigs = () => {
-  $('.configs').each(function() {
-    var configsContainerId = $(this).data('configs-container-id');
-    configs[configsContainerId] = {}
+  var configsContainerId = $configsContainer.data('configs-container-id');
 
-    $(this).find('[data-id]').each(function() {
-      var receiverId = $(this).data('id')
+  configsContainers[configsContainerId] = {
+    selectedReceivers: [],
+    addToSelectedReceivers: function(receiverId) {
+      this.selectedReceivers.push(parseInt(receiverId, 10));
+    },
+    removeFromSelectedReceivers: function (receiverId) {
+      var receiverId = parseInt(receiverId, 10)
+      var idx = this.selectedReceivers.indexOf(receiverId);
+      this.selectedReceivers.splice(idx, 1);
+    }
+  }
 
-      if(!configs[configsContainerId][receiverId]) {
-        addToConfigs(configsContainerId, receiverId);
-      }
-    });
+  $configsContainer.find('[data-config-id]').each(function() {
+    var configId = $(this).data('config-id');
+    var receiverId = $(this).find('[data-config-receiver-id]').data('config-receiver-id');
+
+    if(!configsContainers[configsContainerId]
+      .selectedReceivers
+      .includes(receiverId)) {
+
+      configsContainers[configsContainerId]
+        .addToSelectedReceivers(receiverId);
+    }
   });
 }
 
-$('.configs').each(function() {
-  var configsContainerId = $(this).data('configs-container-id');
-
-
-});
+const initializeAllSelectedReceivers = () => {
+  $('.configs').each(function() {
+    initializeSelectedReceiversFor($(this));
+  });
+}
 
 const generateUserSelect = (users) => {
 
@@ -47,18 +58,14 @@ const generateUserSelect = (users) => {
   return userSelect;
 }
 
-const removeFromConfigs = (configsContainerId, key) => {
-  delete configs[configsContainerId][key]
-}
-
 /* Filtering out selected users */
-const removeSelectedReceiverOptions = (userSelect, currentConfigsContainerId) => {
+const removeSelectedReceiverOptions = (userSelect, configsContainerId) => {
   var $userSelect = $(userSelect);
 
-  for(const config of Object.values(configs[currentConfigsContainerId])) {
-    var $option = $userSelect.children("option[value='" + config.receiverId + "']")
+  configsContainers[configsContainerId].selectedReceivers.forEach((selectedReceiverId) => {
+    var $option = $userSelect.children("option[value='" + selectedReceiverId + "']");
     if(!$option.is(':selected')) $option.remove();
-  }
+  }); 
 
   return $userSelect;
 }
@@ -98,8 +105,8 @@ const insert = ($userSelect, targetConfigsContainerId) => {
     .find('div.col:first')
     .html($userSelect)
     .parents()
-    .insertBefore(
-      $targetConfigsContainer.find('form .row:last')
+    .appendTo(
+      $targetConfigsContainer.find('.new-configs-holder div:first')
     );
 
   $userSelect.formSelect();
@@ -161,14 +168,19 @@ const enableSubmit  = ($that) => {
 }
 
 const disableSubmit = ($that) => {
-  $that.parents('.row:first').siblings('.row:last').find(':submit').addClass('disabled');
+  $that
+    .parents('.configs')
+    .find('.actions')
+    .find(':submit')
+    .addClass('disabled');
 }
 
 $(document).on('turbolinks:load', function() {
 
-  initializeConfigs();
+  initializeAllSelectedReceivers();
 
   $('form').on('click', '.add-btn', function() {
+
     var $that = $(this);
     var currentConfigsContainerId = $(this).closest('.configs').data('configs-container-id');
 
@@ -176,10 +188,6 @@ $(document).on('turbolinks:load', function() {
       .then(generateUserSelect)
       .then((userSelect) => addIdAttr(userSelect, currentConfigsContainerId))
       .then((userSelect) => addNameAttr(userSelect, currentConfigsContainerId))
-      .then((userSelect) => {
-        initializeConfigs();
-        return userSelect;
-      })
       .then((userSelect) => removeSelectedReceiverOptions(userSelect, currentConfigsContainerId))
       .then(($userSelect) => insert($userSelect, currentConfigsContainerId))
       .then(function($userSelect) {
@@ -189,10 +197,13 @@ $(document).on('turbolinks:load', function() {
         $userSelect.on('change', function() {
           var $that = $(this);
 
-          removeFromConfigs(currentConfigsContainerId, previousSelectedVal)
+          if(previousSelectedVal) {
+            configsContainers[currentConfigsContainerId]
+              .removeFromSelectedReceivers(previousSelectedVal);
+          }
 
           if($(this).val()) {
-            addToConfigs(currentConfigsContainerId, $(this).val())
+            configsContainers[currentConfigsContainerId].addToSelectedReceivers($(this).val())
           }
 
           updateSiblingSelectsOption($(this), previousSelectedVal, previousSelectedText);
@@ -216,7 +227,8 @@ $(document).on('turbolinks:load', function() {
 
     if(selectedVal) {
 
-      removeFromConfigs(currentConfigsContainerId, selectedVal);
+      configsContainers[currentConfigsContainerId]
+        .removeFromSelectedReceivers(selectedVal);
 
       updateSiblingSelectsOption($(this), selectedVal, selectedText);
     }
@@ -224,5 +236,11 @@ $(document).on('turbolinks:load', function() {
     $(this).parents('.row:first').remove();
     resetIdAttrs(currentConfigsContainerId);
     resetNameAttrs(currentConfigsContainerId);
+  });
+
+  $('form').on('ajax:success', function() {
+    initializeSelectedReceiversFor($(this).parent());
+
+    disableSubmit($(this));
   });
 });

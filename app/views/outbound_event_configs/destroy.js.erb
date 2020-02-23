@@ -1,0 +1,9 @@
+
+var $existingConfigsHolder = 
+  $('ul.collapsible li.active table tbody');
+
+$existingConfigsHolder
+  .find('tr[data-id="<%= @outbound_event_config.id %>"]')
+  .fadeOut(300, function() {
+    $(this).remove();
+  });

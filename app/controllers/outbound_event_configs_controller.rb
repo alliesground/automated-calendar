@@ -4,7 +4,9 @@ class OutboundEventConfigsController < ApplicationController
   end
 
   def create
-    @outbound_event_configs_form = OutboundEventConfigsForm.new(outbound_event_configs_form_params, user: current_user)
+    @outbound_event_configs_form = OutboundEventConfigsForm.new(
+      outbound_event_configs_form_params, user: current_user
+    )
 
     respond_to do |format|
       if @outbound_event_configs_form.save
@@ -21,6 +23,11 @@ class OutboundEventConfigsController < ApplicationController
         end
       end
     end
+  end
+
+  def destroy
+    @outbound_event_config = OutboundEventConfig.find_by(id: params[:id])
+    @outbound_event_config.delete
   end
 
   private
