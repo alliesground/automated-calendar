@@ -114,6 +114,12 @@ const insert = ($userSelect, targetConfigsContainerId) => {
   return $userSelect;
 }
 
+const updateSelectOptionsFor = ($select, optionVal, optionTxt) => {
+  if(optionVal) {
+    $select.append(new Option(optionTxt, optionVal))
+  }
+}
+
 // update sibling selects option
 const updateSiblingSelectsOption = ($sourceEle, optionVal, optionTxt) => {
   var $siblingSelects = $sourceEle.parents('.row:first').siblings().find('select');
@@ -254,9 +260,17 @@ $(document).on('turbolinks:load', function() {
       $(this).parents('.configs:first')
       .data('configs-container-id')
 
-    var receiverId = $(this).parent().data('config-receiver-id');
+    var receiverId = $deleteConfigLink.parent().data('config-receiver-id');
+
+    console.log('awe: ', receiverId) 
 
     configsContainers[currentConfigsContainerId]
       .removeFromSelectedReceivers(receiverId);
+
+    /*
+    $(this).find('select').each(function() {
+      updateSelectOptionsFor($(this))
+    });*/
+
   });
 });
