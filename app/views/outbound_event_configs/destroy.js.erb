@@ -1,9 +1,11 @@
 
+console.log('Destroyed')
 var $existingConfigsHolder = 
-  $('ul.collapsible li.active table tbody');
+  $('ul.collapsible li.active')
+    .find('.existing-configs-holder');
 
 $existingConfigsHolder
-  .find('tr[data-id="<%= @outbound_event_config.id %>"]')
+  .find('tr[data-config-id="<%= @outbound_event_config.id %>"]')
   .fadeOut(300, function() {
     $(this).remove();
   });
