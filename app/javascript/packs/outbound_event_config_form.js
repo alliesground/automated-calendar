@@ -243,4 +243,20 @@ $(document).on('turbolinks:load', function() {
 
     disableSubmit($(this));
   });
+
+  var $deleteConfigLink = 
+    $('.existing-configs-holder')
+    .find('a');
+
+  $('form').on('ajax:success', $deleteConfigLink, function() {
+
+    var currentConfigsContainerId = 
+      $(this).parents('.configs:first')
+      .data('configs-container-id')
+
+    var receiverId = $(this).parent().data('config-receiver-id');
+
+    configsContainers[currentConfigsContainerId]
+      .removeFromSelectedReceivers(receiverId);
+  });
 });
