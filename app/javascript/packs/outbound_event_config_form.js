@@ -114,11 +114,14 @@ const insert = ($userSelect, targetConfigsContainerId) => {
   return $userSelect;
 }
 
-const updateSelectOptionsFor = ($select, optionVal, optionTxt) => {
+const addSelectOptionTo = ($select, optionVal, optionTxt) => {
   if(optionVal) {
     $select.append(new Option(optionTxt, optionVal))
   }
+  $select.formSelect();
 }
+
+const removeSelectOptionFor = ($select, optionVal) => {}
 
 // update sibling selects option
 const updateSiblingSelectsOption = ($sourceEle, optionVal, optionTxt) => {
@@ -254,23 +257,20 @@ $(document).on('turbolinks:load', function() {
     $('.existing-configs-holder')
     .find('a');
 
-  $('form').on('ajax:success', $deleteConfigLink, function() {
-
+  $deleteConfigLink.on('ajax:success', function() {
     var currentConfigsContainerId = 
       $(this).parents('.configs:first')
       .data('configs-container-id')
 
-    var receiverId = $deleteConfigLink.parent().data('config-receiver-id');
-
-    console.log('awe: ', receiverId) 
+    var receiverId = $(this).parent().data('config-receiver-id');
+    var receiverEmail = $(this).parent().contents()[0].nodeValue;
 
     configsContainers[currentConfigsContainerId]
       .removeFromSelectedReceivers(receiverId);
 
-    /*
-    $(this).find('select').each(function() {
-      updateSelectOptionsFor($(this))
-    });*/
+    $(this).parents('.configs:first').find('select').each(function() {
+      addSelectOptionTo($(this), receiverId, receiverEmail);
+    });
 
   });
 });

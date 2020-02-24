@@ -19,18 +19,19 @@
 
             .collapsible-body
               %div.configs{'data-configs-container-id' => google_cal.id}
+                .row.existing-configs-holder
+                  .col.s12
+                    %table
+                      %tbody
+                        - google_cal.outbound_event_configs.each do |config|
+                          %tr{'data-config-id': config.id}
+                            %td{'data-config-receiver-id': config.receiver_id}
+                              = config.receiver.email
+                              = link_to 'Delete', outbound_event_config_path(config), method: :delete, 
+                                class: 'btn-small red right', remote: true, data: { confirm: "Are you sure?" }
+
                 = form_with model: @outbound_event_configs_form, scope: :outbound_event_configs_form do |f|
                   = f.hidden_field :google_calendar_id, value: google_cal.id
-                  .row.existing-configs-holder
-                    .col.s12
-                      %table
-                        %tbody
-                          - google_cal.outbound_event_configs.each do |config|
-                            %tr{'data-config-id': config.id}
-                              %td{'data-config-receiver-id': config.receiver_id}
-                                = config.receiver.email
-                                = link_to 'Delete', outbound_event_config_path(config), method: :delete, 
-                                  class: 'btn-small red right', remote: true, data: { confirm: "Are you sure?" }
 
                   .row.new-configs-holder
                     .col.s12

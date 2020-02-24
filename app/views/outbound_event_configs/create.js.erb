@@ -1,6 +1,6 @@
 
 var $existingConfigsHolder = 
-  $('ul.collapsible li.active table tbody');
+  $('ul.collapsible li.active .existing-configs-holder');
 
 <% @outbound_event_configs_form.outbound_event_configs
   .each do |outbound_event_config| %>
@@ -12,13 +12,13 @@ var $existingConfigsHolder =
           </td>
         </tr>
       `
-    ).appendTo($existingConfigsHolder);
+    ).appendTo($existingConfigsHolder.find('table tbody'));
 <% end %>
 
 /* removing new config rows */
 $existingConfigsHolder
-  .parents('div.row:first')
-  .siblings('.new-configs-holder')
+  .parent()
+  .find('form .new-configs-holder')
   .children('div.col:first')
   .children()
   .remove();
