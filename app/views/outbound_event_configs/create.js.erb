@@ -9,6 +9,14 @@ var $existingConfigsHolder =
         <tr data-config-id="<%= outbound_event_config.id %>">
           <td data-config-receiver-id="<%= outbound_event_config.receiver_id %>">
             <%= outbound_event_config.receiver.email %>
+
+            <%= link_to 'Delete', 
+              outbound_event_config_path(outbound_event_config), 
+              method: :delete, 
+              class: 'btn-small red right', 
+              remote: true, data: { confirm: "Are you sure?" }
+            %>
+
           </td>
         </tr>
       `

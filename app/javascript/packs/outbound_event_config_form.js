@@ -253,9 +253,7 @@ $(document).on('turbolinks:load', function() {
     disableSubmit($(this));
   });
 
-  var $deleteConfigLink = 
-    $('.existing-configs-holder')
-    .find('a');
+  var $deleteConfigLink = $('.existing-configs-holder') .find('a');
 
   $deleteConfigLink.on('ajax:success', function() {
     var currentConfigsContainerId = 
