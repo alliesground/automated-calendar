@@ -35,12 +35,6 @@
 
                   .row.new-configs-holder
                     .col.s12
-                    
-
-                  -#
-                    .row
-                      = f.fields_for :outbound_event_configs, f.object.outbound_event_configs do |ff|
-                        - ff.collection_select(:receiver_id, User.all, :id, :email)
 
                   .row.actions       
                     .col.s12
