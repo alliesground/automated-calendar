@@ -5,7 +5,7 @@ class EventRegistration
            :title, 
            :persisted?, to: :event
 
-  delegate :google_calendar_id, to: :google_event
+  #delegate :google_calendar_id, to: :google_event
 
   validate :validate_children
   validates_presence_of :event_start_date,
@@ -17,7 +17,8 @@ class EventRegistration
   attr_accessor :event_start_date,
                 :event_end_date,
                 :event_start_time,
-                :event_end_time
+                :event_end_time,
+                :google_calendar_id
 
   def event_start_date
     @event_start_date || event_presenter.event_start_date
@@ -79,8 +80,12 @@ class EventRegistration
     event.save
   end
 
+  def google_calendar
+    @google_calendar ||= GoogleCalendar.find_by(id: google_calendar_id)
+  end
+
   def save(params)
-    self.attributes = event_date_time_params(params)
+    self.attributes = event_registration_params(params)
     event.attributes = params.slice(:title)
     google_event.attributes = params.slice(:google_calendar_id)
 
@@ -88,7 +93,36 @@ class EventRegistration
       save_event
       google_event.save
 
-      GoogleCalendarEventCreator.perform_async(event.id, params[:google_calendar_id], registrar.id)
+      GoogleCalendarEventCreator.perform_async(
+        event.id,
+        params[:google_calendar_id],
+        registrar.id
+      )
+
+      registrar.outbound_event_configs.each do |outbound_event_config|
+        if outbound_event_config.configured_for?(params[:google_calendar_id])
+
+          if google_calendar_exists_for?(outbound_event_config.receiver)
+            GoogleCalendarEventCreator.perform_async(
+              event.id, 
+              google_calendar_for(outbound_event_config.receiver).remote_id,
+              outbound_event_config.receiver_id
+            )
+          else
+            GoogleCalendarCreator.perform_async(
+              google_calendar_for(outbound_event_config.receiver).id,
+              google_calendar_for(outbound_event_config.receiver).name,
+              outbound_event_config.receiver_id
+            )
+
+            GoogleCalendarEventCreator.perform_async(
+              event.id, 
+              google_calendar_for(outbound_event_config.receiver).remote_id,
+              outbound_event_config.receiver_id
+            )
+          end
+        end
+      end
 
       true
     else
@@ -96,8 +130,21 @@ class EventRegistration
     end
   end
 
+  def google_calendar_exists_for?(receiver)
+    receiver.google_calendars.
+      where("lower(name) = ?", google_calendar.name.downcase).
+      exists?
+  end
+
+  def google_calendar_for(receiver)
+    receiver.
+    google_calendars.
+    where("lower(name) = ?", google_calendar.name.downcase).
+    first_or_create
+  end
+
   def update(params)
-    self.attributes = event_date_time_params(params)
+    self.attributes = event_registration_params(params)
     event.attributes = params.slice(:title)
     google_event.attributes = params.slice(:google_calendar_id)
 
@@ -112,11 +159,12 @@ class EventRegistration
 
   private
 
-  def event_date_time_params(params)
+  def event_registration_params(params)
     params.slice(:event_start_date, 
                  :event_end_date, 
                  :event_start_time, 
-                 :event_end_time)
+                 :event_end_time,
+                 :google_calendar_id)
   end
 
   def validate_children

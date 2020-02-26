@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema.define(version: 2020_01_23_011434) do
+ActiveRecord::Schema.define(version: 2020_02_25_125038) do
 
   # These are extensions that must be enabled in order to support this database
   enable_extension "hstore"
@@ -37,6 +37,7 @@ ActiveRecord::Schema.define(version: 2020_01_23_011434) do
     t.string "name"
     t.string "description"
     t.string "remote_id"
+    t.index "lower((name)::text)", name: "index_google_calendars_on_lowercase_name", unique: true
     t.index ["user_id"], name: "index_google_calendars_on_user_id"
   end
 
