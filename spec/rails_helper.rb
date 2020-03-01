@@ -62,6 +62,11 @@ RSpec.configure do |config|
   # arbitrary gems may also be filtered via:
   # config.filter_gems_from_backtrace("gem name")
 
+  # Clears Sidekiq jobs between tests
+  config.before(:each) do
+    Sidekiq::Worker.clear_all
+  end
+
   # Database cleaner config
   config.before(:suite) do
     DatabaseCleaner.clean_with(:truncation)

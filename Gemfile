@@ -33,6 +33,7 @@ gem 'google-api-client', require: 'google/apis/calendar_v3'
 gem 'pry'
 gem "simple_calendar", "~> 2.0"
 gem 'sidekiq', '~> 5.2', '>= 5.2.7'
+gem 'sidekiq-batch'
 
 group :development, :test do
   # Call 'byebug' anywhere in the code to stop execution and get a debugger console
@@ -53,6 +54,7 @@ end
 group :test do
   gem 'database_cleaner-active_record'
   gem 'database_cleaner-redis'
+  gem 'rspec-sidekiq'
 end
 
 # Windows does not include zoneinfo files, so bundle the tzinfo-data gem

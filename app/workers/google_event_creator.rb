@@ -1,4 +1,4 @@
-class GoogleCalendarEventCreator
+class GoogleEventCreator
   require_relative '../../lib/google_cal_wrapper.rb'
 
   include Rails.application.routes.url_helpers
@@ -6,11 +6,10 @@ class GoogleCalendarEventCreator
 
   attr_reader :event_receiver
 
-  def perform(event_id, google_cal_id, event_receiver_id)
+  def perform(event_id, google_cal_remote_id, event_receiver_id)
 
     time_zone = 'Australia/Melbourne'
     event = Event.find_by(id: event_id)
-    google_calendar = GoogleCalendar.find_by(id: google_cal_id)
     @event_receiver = User.find_by(id: event_receiver_id)
 
     google_cal_wrapper = GoogleCalWrapper.new(event_receiver)
@@ -28,7 +27,7 @@ class GoogleCalendarEventCreator
     )
 
     response = google_cal_wrapper.insert_event(
-      google_calendar.remote_id,
+      google_cal_remote_id,
       remote_event
     )
 

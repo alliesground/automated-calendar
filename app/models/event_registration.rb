@@ -93,33 +93,41 @@ class EventRegistration
       save_event
       google_event.save
 
-      GoogleCalendarEventCreator.perform_async(
+      google_event_creator.perform_async(
         event.id,
-        params[:google_calendar_id],
+        google_calendar.remote_id,
         registrar.id
       )
+
+      #OutboundEventProcessor.execute
 
       registrar.outbound_event_configs.each do |outbound_event_config|
         if outbound_event_config.configured_for?(params[:google_calendar_id])
 
           if google_calendar_exists_for?(outbound_event_config.receiver)
-            GoogleCalendarEventCreator.perform_async(
+            google_event_creator.perform_async(
               event.id, 
               google_calendar_for(outbound_event_config.receiver).remote_id,
               outbound_event_config.receiver_id
             )
           else
-            GoogleCalendarCreator.perform_async(
-              google_calendar_for(outbound_event_config.receiver).id,
-              google_calendar_for(outbound_event_config.receiver).name,
-              outbound_event_config.receiver_id
+            outbound_event_config.receiver.google_calendars.create(
+              name: google_calendar.name
             )
 
-            GoogleCalendarEventCreator.perform_async(
-              event.id, 
-              google_calendar_for(outbound_event_config.receiver).remote_id,
-              outbound_event_config.receiver_id
-            )
+            batch = Sidekiq::Batch.new
+
+            batch.on(:success, 
+                     "#{self.class}#execute_google_event_creator",
+                     receiver: outbound_event_config.receiver)
+
+            batch.jobs do
+              GoogleCalendarCreator.perform_async(
+                google_calendar_for(outbound_event_config.receiver).id,
+                google_calendar_for(outbound_event_config.receiver).name,
+                outbound_event_config.receiver_id
+              )
+            end
           end
         end
       end
@@ -128,6 +136,14 @@ class EventRegistration
     else
       false
     end
+  end
+
+  def execute_google_event_creator(status, options)
+    google_event_creator.perform_async(
+      event.id, 
+      google_calendar_for(options[:receiver]).remote_id,
+      options[:receiver].id
+    )
   end
 
   def google_calendar_exists_for?(receiver)
@@ -158,6 +174,10 @@ class EventRegistration
   end
 
   private
+
+  def google_event_creator
+    GoogleEventCreator
+  end
 
   def event_registration_params(params)
     params.slice(:event_start_date, 
