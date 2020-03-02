@@ -100,6 +100,7 @@ class EventRegistration
       )
 
       registrant.outbound_event_configs.each do |outbound_event_config|
+        #OutboundEventProcessing.start(outbound_event_config)
 
         if outbound_event_config.configured_for?(params[:google_calendar_id])
 
@@ -152,7 +153,7 @@ class EventRegistration
   def google_calendar_for(receiver)
     receiver.
     google_calendars.
-    where("lower(name) = ?", google_calendar.name.downcase).
+    where("lower(name) = ?", current_google_calendar.name.downcase).
     first_or_create
   end
 
