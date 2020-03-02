@@ -9,11 +9,11 @@ class EventsController < ApplicationController
   end
 
   def new
-    @event_registration = EventRegistration.new(registrar: current_user)
+    @event_registration = EventRegistration.new(registrant: current_user)
   end
 
   def create
-    @event_registration = EventRegistration.new(registrar: current_user)
+    @event_registration = EventRegistration.new(registrant: current_user)
 
     respond_to do |format|
       if @event_registration.save(event_params)
@@ -35,14 +35,14 @@ class EventsController < ApplicationController
   def edit 
     @event_registration = EventRegistration.new(
       event: @event, 
-      registrar: current_user
+      registrant: current_user
     )
   end 
 
   def update
     @event_registration = EventRegistration.new(
       event: @event,
-      registrar: current_user
+      registrant: current_user
     )
 
     respond_to do |format|

@@ -36,10 +36,10 @@ class EventRegistration
     @event_end_time || event_presenter.event_end_time
   end
 
-  attr_reader :registrar
+  attr_reader :registrant
 
-  def initialize(registrar:, event: nil)
-    @registrar = registrar
+  def initialize(registrant:, event: nil)
+    @registrant = registrant
     @event = event
   end
 
@@ -52,7 +52,7 @@ class EventRegistration
   end
 
   def event
-    @event ||= registrar.events.build
+    @event ||= registrant.events.build
   end
 
   def google_event
@@ -96,12 +96,11 @@ class EventRegistration
       google_event_creator.perform_async(
         event.id,
         google_calendar.remote_id,
-        registrar.id
+        registrant.id
       )
 
-      #OutboundEventProcessor.execute
+      registrant.outbound_event_configs.each do |outbound_event_config|
 
-      registrar.outbound_event_configs.each do |outbound_event_config|
         if outbound_event_config.configured_for?(params[:google_calendar_id])
 
           if google_calendar_exists_for?(outbound_event_config.receiver)

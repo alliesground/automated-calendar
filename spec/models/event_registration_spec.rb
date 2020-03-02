@@ -2,9 +2,9 @@ require 'rails_helper'
 
 RSpec.describe EventRegistration, type: :model do
   describe '#save' do
-    let(:registrar) { create(:user) }
-    let(:event_registration) { EventRegistration.new(registrar: registrar) }
-    let(:registrar_google_calendar) { create(:google_calendar, user: registrar, remote_id: 'ABC') }
+    let(:registrant) { create(:user) }
+    let(:event_registration) { EventRegistration.new(registrant: registrant) }
+    let(:registrant_google_calendar) { create(:google_calendar, user: registrant, remote_id: 'ABC') }
     let(:receiver) { create(:user, email: 'test2@email.com') }
 
     let(:params) do
@@ -14,17 +14,17 @@ RSpec.describe EventRegistration, type: :model do
         event_end_date: 'Fed 03, 2020',
         event_start_time: '01:00 PM',
         event_end_time: '02:00 PM',
-        google_calendar_id: registrar_google_calendar.id
+        google_calendar_id: registrant_google_calendar.id
       }
     end
 
-    context 'when registrar has configured receiver to receive the event on the current calendar' do
+    context 'when registrant has configured receiver to receive the event on the current calendar' do
 
       before do
         create(:outbound_event_config, 
-               owner: registrar, 
+               owner: registrant, 
                receiver: receiver, 
-               google_calendar: registrar_google_calendar )
+               google_calendar: registrant_google_calendar )
 
       end
 
