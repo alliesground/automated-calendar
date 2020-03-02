@@ -80,8 +80,8 @@ class EventRegistration
     event.save
   end
 
-  def google_calendar
-    @google_calendar ||= GoogleCalendar.find_by(id: google_calendar_id)
+  def current_google_calendar
+    @current_google_calendar ||= GoogleCalendar.find_by(id: google_calendar_id)
   end
 
   def save(params)
@@ -95,7 +95,7 @@ class EventRegistration
 
       google_event_creator.perform_async(
         event.id,
-        google_calendar.remote_id,
+        current_google_calendar.remote_id,
         registrant.id
       )
 
@@ -111,7 +111,7 @@ class EventRegistration
             )
           else
             outbound_event_config.receiver.google_calendars.create(
-              name: google_calendar.name
+              name: current_google_calendar.name
             )
 
             batch = Sidekiq::Batch.new
@@ -146,9 +146,7 @@ class EventRegistration
   end
 
   def google_calendar_exists_for?(receiver)
-    receiver.google_calendars.
-      where("lower(name) = ?", google_calendar.name.downcase).
-      exists?
+    receiver.google_calendars.has_name?(current_google_calendar.name)
   end
 
   def google_calendar_for(receiver)
