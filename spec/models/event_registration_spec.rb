@@ -61,8 +61,10 @@ RSpec.describe EventRegistration, type: :model do
 
         it 'enques GoogleEventCreator worker job with remote calendar id' do
           event_registration.save(params)
+
           receiver_google_calendar = GoogleCalendar.last
 
+          # stubing update by GoogleCalendarCreator worker
           receiver_google_calendar.update(remote_id: '123')
 
           b = Sidekiq::Batch.new
