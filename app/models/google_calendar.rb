@@ -6,7 +6,9 @@ class GoogleCalendar < ApplicationRecord
   has_many :google_events
   has_many :outbound_event_configs
 
-  def self.has_name?(name)
-    where("lower(name) = ?", name.downcase).exists?
+  scope :find_by_lowercase_name, -> (name) { where("lower(name) = ?", name.downcase) }
+
+  def self.exist_with_name?(name)
+    find_by_lowercase_name(name).exists?
   end
 end

@@ -4,7 +4,7 @@ RSpec.describe EventRegistration, type: :model do
   describe '#save' do
     let(:registrant) { create(:user) }
     let(:event_registration) { EventRegistration.new(registrant: registrant) }
-    let(:registrant_google_calendar) { create(:google_calendar, user: registrant, remote_id: 'ABC') }
+    let(:registrant_google_calendar) { create(:google_calendar, user: registrant) }
     let(:receiver) { create(:user, email: 'test2@email.com') }
 
     let(:params) do
@@ -18,70 +18,21 @@ RSpec.describe EventRegistration, type: :model do
       }
     end
 
-    context 'when registrant has configured receiver to receive the event on the current calendar' do
+    context 'with valid arguments' do
+      context 'when registrant has outbound events configured' do
+        before do
+          create(:outbound_event_config, 
+                 owner: registrant, 
+                 receiver: receiver, 
+                 google_calendar: registrant_google_calendar)
+        end
 
-      before do
-        create(:outbound_event_config, 
-               owner: registrant, 
-               receiver: receiver, 
-               google_calendar: registrant_google_calendar )
+        it 'starts outbound event processing' do
 
-      end
-
-      context 'if the receiver has a calendar with name similar to current calendar' do
-
-        let!(:receiver_google_calendar) { create(:google_calendar, user: receiver) }
-
-        it "executes GoogleEventCreator worker" do
+          expect_any_instance_of(OutboundEventProcessing).to receive(:start).with(no_args)
           event_registration.save(params)
-
-          expect(GoogleEventCreator).to have_enqueued_sidekiq_job(
-            Event.last.id,
-            receiver_google_calendar.remote_id,
-            receiver.id
-          )
         end
       end
-
-      context 'if the receiver does not have a calendar with name similar to current calendar' do
-        it 'creates google calendar locally' do
-          expect{event_registration.save(params)}.to change{GoogleCalendar.count}.by(1)
-        end
-
-        it 'enques GoogleCalendarCreator worker job' do
-          event_registration.save(params)
-          receiver_google_calendar = GoogleCalendar.last
-
-          expect(GoogleCalendarCreator).to have_enqueued_sidekiq_job(
-            receiver_google_calendar.id,
-            receiver_google_calendar.name,
-            receiver.id
-          )
-        end
-
-        it 'enques GoogleEventCreator worker job with remote calendar id' do
-          event_registration.save(params)
-
-          receiver_google_calendar = GoogleCalendar.last
-
-          # stubing update by GoogleCalendarCreator worker
-          receiver_google_calendar.update(remote_id: '123')
-
-          b = Sidekiq::Batch.new
-
-          event_registration.execute_google_event_creator(Sidekiq::Batch::Status.new(b.bid), {receiver: receiver})
-
-
-          expect(GoogleEventCreator).to have_enqueued_sidekiq_job(
-            Event.last.id,
-            receiver_google_calendar.remote_id,
-            receiver.id
-          )
-
-          expect(GoogleEventCreator.jobs.last['args'][1]).not_to be_nil
-        end
-      end
-
     end
   end
 end
