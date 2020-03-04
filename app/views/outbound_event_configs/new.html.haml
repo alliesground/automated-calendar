@@ -10,7 +10,7 @@
             Configure Event Receivers
 
       %ul.collapsible
-        - GoogleCalendar.all.each do |google_cal|
+        - current_user.google_calendars.each do |google_cal|
           %li
             .collapsible-header
               %i.material-icons

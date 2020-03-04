@@ -28,7 +28,7 @@
     .input-field.col.s12
       %i{class: 'material-icons prefix'}
         calendar_today
-      = f.collection_select(:google_calendar_id, GoogleCalendar.all, :id, :name, include_blank: 'Please select a calendar')
+      = f.collection_select(:google_calendar_id, current_user.google_calendars, :id, :name, include_blank: 'Please select a calendar')
 
   .row
     .input-field.col.s12
