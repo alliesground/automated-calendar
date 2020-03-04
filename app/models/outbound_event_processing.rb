@@ -28,8 +28,10 @@ class OutboundEventProcessing
         batch = Sidekiq::Batch.new
 
         batch.on(:success,
-                 "#{self.class}#execute_google_event_creator_worker",
-                 receiver_id: receiver.id, event_id: event.id)
+                 OutboundEventProcessing::CalendarCreationCallback,
+                 'google_calendar_id' => receiver_google_calendar.id, 
+                 'receiver_id' => receiver.id, 
+                 'event_id' => event.id)
 
         batch.jobs do
           GoogleCalendarCreator.perform_async(
@@ -42,14 +44,16 @@ class OutboundEventProcessing
     end
   end
 
-  def execute_google_event_creator_worker(status, options)
-    self.receiver = User.find_by(id: options[:receiver_id])
+  class CalendarCreationCallback
+    def on_success(_status, options)
+      google_calendar = GoogleCalendar.find_by(id: options['google_calendar_id'])
 
-    GoogleEventCreator.perform_async(
-      options[:event_id], 
-      receiver_google_calendar.id,
-      options[:receiver_id]
-    )
+      GoogleEventCreator.perform_async(
+        options['event_id'], 
+        google_calendar.remote_id,
+        options['receiver_id']
+      )
+    end
   end
 
   private

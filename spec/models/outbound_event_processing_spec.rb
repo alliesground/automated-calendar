@@ -71,20 +71,27 @@ RSpec.describe OutboundEventProcessing, type: :model do
 
         it 'enqueus GoogleEventCreator worker job after GoogleCalendarCreator worker successfully executes' do
           outbound_event_processing.start
+          receiver.google_calendars.last.update(remote_id: '123ABC')
 
           b = Sidekiq::Batch.new
           b.on(:success,
-               "OutboundEventProcessing#execute_google_event_creator_worker",
-               receiver: receiver)
+               OutboundEventProcessing::CalendarCreationCallback,
+               'google_calendar_id' => receiver.google_calendars.last.id,
+               'receiver_id' => receiver.id,
+               'event_id' => event.id)
 
-          outbound_event_processing.execute_google_event_creator_worker(
-            Sidekiq::Batch::Status.new(b.bid), 
-            {receiver_id: receiver.id, event_id: event.id}
+          OutboundEventProcessing::CalendarCreationCallback.new.on_success(
+            Sidekiq::Batch::Status.new(b.bid),
+            {
+              'google_calendar_id' => receiver.google_calendars.last.id,
+              'receiver_id' => receiver.id,
+              'event_id' => event.id
+            }
           )
 
           expect(GoogleEventCreator).to have_enqueued_sidekiq_job(
             Event.last.id,
-            receiver.google_calendars.last.id,
+            '123ABC',
             receiver.id
           )
 
