@@ -24,22 +24,47 @@ RSpec.describe OutboundEventProcessing, type: :model do
       end
     end
 
-    describe 'GoogleEventCreator worker execution' do
-      include_context 'when outbound_event_config is configured for the given google calendar'
+    shared_context 'when outbound event receiver has allowed the application access to their google calendar' do
+      before do
+        allow(GoogleCalendarConfig).to receive(:authorized_by?).with(any_args).and_return(true)
+      end
+    end
 
-      context 'when receiver has a google calendar with name matching given google calendar name' do
+    shared_context 'when receiver has a google calendar with name matching given google calendar name' do
+      before do
+        create(:google_calendar, user: receiver, remote_id: 'testing') 
+      end
+    end
+
+    describe 'GoogleEventCreator worker execution' do
+      include_context 'when outbound event receiver has allowed the application access to their google calendar'
+      include_context 'when outbound_event_config is configured for the given google calendar'
+      include_context 'when receiver has a google calendar with name matching given google calendar name'
+
+      it 'enqueus GoogleEventCreator worker job' do
+        outbound_event_processing.start
+
+        expect(GoogleEventCreator).to have_enqueued_sidekiq_job(
+          event.id,
+          'testing',
+          receiver.id
+        )
+      end
+    end
+
+    describe 'GoogleEventCreator worker execution' do
+      context 'when outbound event receiver has not allowed the application access to their google calendar' do
         before do
-          create(:google_calendar, user: receiver, remote_id: 'testing') 
+          allow(GoogleCalendarConfig).to receive(:authorized_by?).with(any_args).and_return(false)
         end
 
-        it 'enqueus GoogleEventCreator worker job' do
-          outbound_event_processing.start
+        include_context 'when outbound_event_config is configured for the given google calendar'
 
-          expect(GoogleEventCreator).to have_enqueued_sidekiq_job(
-            event.id,
-            'testing',
-            receiver.id
-          )
+        include_context 'when receiver has a google calendar with name matching given google calendar name'
+
+        it 'does not enqueu GoogleEventCreator worker job' do
+          outbound_event_processing.start
+          expect(GoogleEventCreator.jobs.size).to eq 0
         end
       end
     end

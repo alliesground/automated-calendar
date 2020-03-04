@@ -12,7 +12,9 @@ class OutboundEventProcessing
   end
 
   def start
-    if outbound_event_config.configured_for?(current_google_calendar)
+
+    if(outbound_event_config.configured_for?(current_google_calendar) &&
+       GoogleCalendarConfig.authorized_by?(receiver))
 
       if receiver.google_calendars.exist_with_name?(current_google_calendar.name)
         GoogleEventCreator.perform_async(
