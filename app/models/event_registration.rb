@@ -93,20 +93,21 @@ class EventRegistration
       save_event
       google_event.save
 
-      GoogleEventCreator.perform_async(
-        event.id,
-        google_calendar.remote_id,
-        registrant.id
-      )
-
       registrant.outbound_event_configs.each do |outbound_event_config|
-
         OutboundEventProcessing.new(
           outbound_event_config, 
           google_calendar,
           event
         ).start
       end
+
+      return unless GoogleCalendarConfig.authorized_by?(registrant)
+
+      GoogleEventCreator.perform_async(
+        event.id,
+        google_calendar.remote_id,
+        registrant.id
+      )
 
       true
     else
