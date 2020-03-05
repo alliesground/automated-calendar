@@ -4,9 +4,10 @@
       .row
         %h5.margin-top-0
           Google Calendars
+          = link_to 'Import Google Calendars', import_google_calendars_path, class: 'btn-small btn-primary'
       .row  
         %ul
-          - @calendar_list.items.each do |calendar|
+          - @google_calendars.each do |google_calendar|
             %li
-              = calendar.summary
+              = google_calendar.name
   

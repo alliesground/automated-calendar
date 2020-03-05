@@ -1,8 +1,7 @@
 class GoogleCalendarsController < ApplicationController
 
   def index
-    google_cal_wrapper = GoogleCalWrapper.new(current_user)
-    @calendar_list = google_cal_wrapper.list_calendar_lists
+    @google_calendars = current_user.google_calendars
   end
 
   def new

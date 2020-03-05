@@ -17,4 +17,6 @@ Rails.application.routes.draw do
   resources :outbound_event_configs, only: [:new, :create, :destroy]
 
   resources :users, only: :index
+
+  resources :import_google_calendars, only: :index
 end
