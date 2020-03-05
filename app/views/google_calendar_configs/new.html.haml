@@ -1,10 +1,15 @@
 :javascript
   $(function() {
+    var token = document.getElementsByName('csrf-token')[0].content
+
     $('#google-cal-config :checkbox').change(function() {
       if($(this).is(':checked')) {
         $(this).closest('form').submit()
       } else {
         $.ajax({
+          headers: {
+            'X-CSRF-Token': token
+          },
           type: 'DELETE',
           url: '/google_calendar_configs'
         })

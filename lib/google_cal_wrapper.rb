@@ -5,6 +5,9 @@ class GoogleCalWrapper
 
   def initialize(user)
     @user = user
+
+    return unless user.google_calendar_config.present?
+
     client.update!(user.google_calendar_config.authorization)
     service.authorization = client
   end
@@ -30,6 +33,10 @@ class GoogleCalWrapper
     end
   end
 
+  def client
+    @client ||= Signet::OAuth2::Client.new(client_options)
+  end
+
   private
 
   def get_service
@@ -40,10 +47,6 @@ class GoogleCalWrapper
       user.google_calendar_config.authorization.merge(response)
       retry
     end
-  end
-
-  def client
-    @client ||= Signet::OAuth2::Client.new(client_options)
   end
 
   def service

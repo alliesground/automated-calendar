@@ -3,7 +3,7 @@ class GoogleCalendarConfigsController < ApplicationController
   end
 
   def create
-    client = Signet::OAuth2::Client.new(client_options)
+    client = GoogleCalWrapper.new(current_user).client
 
     redirect_to client.authorization_uri.to_s
   end
@@ -13,9 +13,8 @@ class GoogleCalendarConfigsController < ApplicationController
   end
 
   def callback
-    client = Signet::OAuth2::Client.new(client_options)
+    client = GoogleCalWrapper.new(current_user).client
     client.code = params[:code]
-
     response = client.fetch_access_token!
 
     current_user.create_google_calendar_config(authorization: response)
