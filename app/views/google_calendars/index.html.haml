@@ -4,7 +4,15 @@
       .row
         %h5.margin-top-0
           Google Calendars
-          = link_to 'Import Google Calendars', import_google_calendars_path, class: 'btn-small btn-primary'
+      .row
+        = link_to 'Import Google Calendars', 
+          import_google_calendars_path, 
+          class: "btn-small btn-primary #{'disabled' unless GoogleCalendarConfig.authorized_by?(current_user)}"
+
+        - unless GoogleCalendarConfig.authorized_by?(current_user)
+          %p{style: "font-size:13px"} 
+            To import google calendars from your gmail account you have to first allow this application access to your google calendar in
+            = link_to 'Settings', new_google_calendar_config_path
       .row  
         %ul
           - @google_calendars.each do |google_calendar|
