@@ -10,7 +10,7 @@
     = stylesheet_link_tag 'https://fonts.googleapis.com/icon?family=Material+Icons'
     = javascript_pack_tag 'application', 'data-turbolinks-track': 'reload'
     = yield :turbolink_full_reload
-  %body
+  %body{style: "padding-top: 100px"}
     = render 'shared/header'
     = render 'shared/messages'
     = yield
