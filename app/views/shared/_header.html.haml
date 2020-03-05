@@ -10,6 +10,8 @@
         %li
           = link_to 'Configure', new_outbound_event_config_path
         %li
+          = link_to 'Calendars', google_calendars_path
+        %li
           - if user_signed_in?
             = link_to 'Logout', destroy_user_session_path, method: :delete
           - else
