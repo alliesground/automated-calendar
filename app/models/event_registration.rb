@@ -48,7 +48,7 @@ class EventRegistration
   end
 
   def event_presenter
-    EventPresenter.new(event)
+    @event_presenter ||= EventPresenter.new(event)
   end
 
   def event
