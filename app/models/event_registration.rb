@@ -84,6 +84,10 @@ class EventRegistration
     @google_calendar ||= GoogleCalendar.find_by(id: google_calendar_id)
   end
 
+  def google_calendar_id
+    @google_calendar_id ||= google_event.google_calendar_id
+  end
+
   def save(params)
     self.attributes = event_registration_params(params)
     event.attributes = params.slice(:title)
