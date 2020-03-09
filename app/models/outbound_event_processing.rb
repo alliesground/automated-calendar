@@ -19,7 +19,7 @@ class OutboundEventProcessing
       if receiver.google_calendars.exist_with_name?(current_google_calendar.name)
         GoogleEventCreator.perform_async(
           event.id, 
-          receiver_google_calendar.remote_id,
+          receiver_google_calendar.id,
           receiver.id
         )
       else
@@ -52,7 +52,7 @@ class OutboundEventProcessing
 
       GoogleEventCreator.perform_async(
         options['event_id'], 
-        google_calendar.remote_id,
+        google_calendar.id,
         options['receiver_id']
       )
     end

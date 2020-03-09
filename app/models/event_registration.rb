@@ -56,7 +56,7 @@ class EventRegistration
   end
 
   def google_event
-    @google_event ||= (event.google_event || event.build_google_event)
+    @google_event ||= (event.google_events.new)
   end
 
   def set_start_time
@@ -91,11 +91,9 @@ class EventRegistration
   def save(params)
     self.attributes = event_registration_params(params)
     event.attributes = params.slice(:title)
-    google_event.attributes = params.slice(:google_calendar_id)
 
     if valid?
       save_event
-      google_event.save
 
       registrant.outbound_event_configs.each do |outbound_event_config|
         OutboundEventProcessing.new(
@@ -109,7 +107,7 @@ class EventRegistration
 
       GoogleEventCreator.perform_async(
         event.id,
-        google_calendar.remote_id,
+        google_calendar.id,
         registrant.id
       )
 
