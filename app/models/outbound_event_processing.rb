@@ -24,25 +24,7 @@ class OutboundEventProcessing
           receiver.id
         )
       else
-        receiver.google_calendars.create(
-          name: current_google_calendar.name
-        )
-
-        batch = Sidekiq::Batch.new
-
-        batch.on(:success,
-                 OutboundEventProcessing::CalendarCreationCallback,
-                 'google_calendar_id' => receiver_google_calendar.id, 
-                 'receiver_id' => receiver.id, 
-                 'event_id' => event.id)
-
-        batch.jobs do
-          GoogleCalendarCreator.perform_async(
-            receiver_google_calendar.id,
-            receiver_google_calendar.name,
-            receiver.id
-          )
-        end
+        create_google_calendar
       end
     end
   end
@@ -62,6 +44,8 @@ class OutboundEventProcessing
           )
         end
 
+      else
+        create_google_calendar
       end
     end
   end
@@ -82,6 +66,28 @@ class OutboundEventProcessing
 
   def receiver_google_calendar
     receiver.google_calendars.find_by_lowercase_name(current_google_calendar.name).first
+  end
+
+  def create_google_calendar
+    receiver.google_calendars.create(
+      name: current_google_calendar.name
+    )
+
+    batch = Sidekiq::Batch.new
+
+    batch.on(:success,
+             OutboundEventProcessing::CalendarCreationCallback,
+             'google_calendar_id' => receiver_google_calendar.id, 
+             'receiver_id' => receiver.id, 
+             'event_id' => event.id)
+
+    batch.jobs do
+      GoogleCalendarCreator.perform_async(
+        receiver_google_calendar.id,
+        receiver_google_calendar.name,
+        receiver.id
+      )
+    end
   end
 
 end
