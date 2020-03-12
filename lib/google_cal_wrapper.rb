@@ -33,6 +33,18 @@ class GoogleCalWrapper
     end
   end
 
+  def get_event(cal_id, event_id)
+    get_service do |service|
+      service.get_event(cal_id, event_id)
+    end
+  end
+
+  def update_event(cal_id, event_id, event)
+    get_service do |service|
+      service.update_event(cal_id, event_id, event)
+    end
+  end
+
   def client
     @client ||= Signet::OAuth2::Client.new(client_options)
   end

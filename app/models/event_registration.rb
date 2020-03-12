@@ -5,8 +5,6 @@ class EventRegistration
            :title, 
            :persisted?, to: :event
 
-  #delegate :google_calendar_id, to: :google_event
-
   validate :validate_children
   validates_presence_of :event_start_date,
                         :event_end_date,
@@ -55,10 +53,6 @@ class EventRegistration
     @event ||= registrant.events.build
   end
 
-  def google_event
-    @google_event ||= (event.google_events.new)
-  end
-
   def set_start_time
     date = Time.zone.parse(event_start_date)
     time = Time.zone.parse(event_start_time)
@@ -85,7 +79,7 @@ class EventRegistration
   end
 
   def google_calendar_id
-    @google_calendar_id ||= google_event.google_calendar_id
+    @google_calendar_id ||= event.google_calendar_ids_for(registrant).first
   end
 
   def save(params)
@@ -117,14 +111,35 @@ class EventRegistration
     end
   end
 
+  def google_events
+    event.google_events_for(registrant)
+  end
+
   def update(params)
     self.attributes = event_registration_params(params)
     event.attributes = params.slice(:title)
-    google_event.attributes = params.slice(:google_calendar_id)
 
     if valid?
       save_event
-      google_event.save
+      google_events.first.update_column(:google_calendar_id, google_calendar_id)
+
+      registrant.outbound_event_configs.each do |outbound_event_config|
+        OutboundEventProcessing.new(
+          outbound_event_config, 
+          google_calendar,
+          event
+        ).update
+      end
+
+      return unless GoogleCalendarConfig.authorized_by?(registrant)
+
+      GoogleEventUpdater.perform_async(
+        event.id,
+        google_calendar.remote_id,
+        google_events.first.remote_id,
+        registrant.id
+      )
+
       true
     else
       false
