@@ -79,7 +79,11 @@ class EventRegistration
   end
 
   def google_calendar_id
-    @google_calendar_id ||= event.google_calendar_ids_for(registrant).first
+    @google_calendar_id ||= google_events.first.google_calendar_id
+  end
+
+  def google_events
+    event.google_events_for(registrant.google_calendars)
   end
 
   def save(params)
@@ -111,17 +115,12 @@ class EventRegistration
     end
   end
 
-  def google_events
-    event.google_events_for(registrant)
-  end
-
   def update(params)
     self.attributes = event_registration_params(params)
     event.attributes = params.slice(:title)
 
     if valid?
       save_event
-      google_events.first.update_column(:google_calendar_id, google_calendar_id)
 
       registrant.outbound_event_configs.each do |outbound_event_config|
         OutboundEventProcessing.new(
@@ -133,12 +132,24 @@ class EventRegistration
 
       return unless GoogleCalendarConfig.authorized_by?(registrant)
 
-      GoogleEventUpdater.perform_async(
-        event.id,
-        google_calendar.remote_id,
-        google_events.first.remote_id,
-        registrant.id
-      )
+      if calendar_changed?
+        # destroy previous google event
+        google_events.first.delete
+
+        # create new google event for new updated calendar
+        GoogleEventCreator.perform_async(
+          event.id,
+          google_calendar.id,
+          registrant.id
+        )
+      else
+        GoogleEventUpdater.perform_async(
+          event.id,
+          google_calendar.remote_id,
+          google_events.first.remote_id,
+          registrant.id
+        )
+      end
 
       true
     else
@@ -147,6 +158,10 @@ class EventRegistration
   end
 
   private
+
+  def calendar_changed?
+    google_events.first.google_calendar_id != google_calendar_id
+  end
 
   def event_registration_params(params)
     params.slice(:event_start_date, 

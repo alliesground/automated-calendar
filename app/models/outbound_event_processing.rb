@@ -33,9 +33,16 @@ class OutboundEventProcessing
     if(outbound_event_config.configured_for?(current_google_calendar) &&
        GoogleCalendarConfig.authorized_by?(receiver))
 
+      # if calendar updated
+      event.google_events_for(receiver.google_calendars).each do |google_event|
+        if(google_event.google_calendar_id !=
+           current_google_calendar.id)
+        end
+      end
+
       if receiver.google_calendars.exist_with_name?(current_google_calendar.name)
 
-        event.google_events_for(receiver).each do |google_event|
+        event.google_events_for(receiver.google_calendars).each do |google_event|
           GoogleEventUpdater.perform_async(
             event.id,
             receiver_google_calendar.remote_id,
