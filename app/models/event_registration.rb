@@ -79,8 +79,10 @@ class EventRegistration
   end
 
   def google_calendar_id
-    #@google_calendar_id ||= registrant_google_events.first.google_calendar_id
-    @google_calendar_id ||= event.google_events.by_user(registrant).first.google_calendar_id
+    @google_calendar_id ||= event.
+                            google_events.
+                            by_user(registrant).
+                            first&.google_calendar_id
   end
 
   def save(params)
@@ -118,6 +120,7 @@ class EventRegistration
   end
 
   def update(params)
+    params.merge!(google_calendar_id: params[:google_calendar_id].to_i)
     self.attributes = event_registration_params(params)
     event.attributes = params.slice(:title)
 
