@@ -14,40 +14,48 @@ class OutboundEventProcessing
   def start
     return unless GoogleCalendarConfig.authorized_by?(receiver)
 
-    if receiver.google_calendars.exist_with_name?(current_google_calendar.name)
-      GoogleEventCreator.perform_async(
-        event.id, 
-        receiver_google_calendar.id,
-        receiver.id
-      )
-    else
+    unless receiver
+      .google_calendars
+      .by_lowercase_name(current_google_calendar.name)
+      .present?
+
       create_google_calendar
+      return
     end
+
+    GoogleEventCreator.perform_async(
+      event.id, 
+      receiver_google_calendar.id,
+      receiver.id
+    )
   end
 
   def update
     return unless GoogleCalendarConfig.authorized_by?(receiver)
 
-    if receiver.google_calendars.exist_with_name?(current_google_calendar.name)
+    unless receiver
+      .google_calendars
+      .by_lowercase_name(current_google_calendar.name)
+      .present?
 
-      google_event = event.google_events.by_user_and_calendar_name(
-        receiver,
-        current_google_calendar.name
-      ).first
-
-      if google_event.present?
-        GoogleEventUpdater.perform_async(
-          event.id,
-          receiver_google_calendar.remote_id,
-          google_event.remote_id,
-          receiver.id
-        )
-      else
-        GoogleEventCreater.perform_async()
-      end
-
-    else
       create_google_calendar
+      return
+    end
+
+    google_event = event.google_events.by_user_and_calendar_name(
+      receiver,
+      current_google_calendar.name
+    ).first
+
+    if google_event.present?
+      GoogleEventUpdater.perform_async(
+        event.id,
+        receiver_google_calendar.remote_id,
+        google_event.remote_id,
+        receiver.id
+      )
+    else
+      GoogleEventCreater.perform_async()
     end
   end
 
@@ -74,7 +82,7 @@ class OutboundEventProcessing
   end
 
   def receiver_google_calendar
-    receiver.google_calendars.find_by_lowercase_name(current_google_calendar.name).first
+    receiver.google_calendars.by_lowercase_name(current_google_calendar.name).first
   end
 
   def create_google_calendar

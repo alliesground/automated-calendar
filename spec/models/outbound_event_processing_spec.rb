@@ -2,6 +2,12 @@ require 'rails_helper'
 
 RSpec.describe OutboundEventProcessing, type: :model do
 
+  shared_context 'allow access to google calendar' do
+    before do
+      allow(GoogleCalendarConfig).to receive(:authorized_by?).with(any_args).and_return(true)
+    end
+  end
+
   describe '#start' do
     let(:registrant) { create(:user) }
     let(:current_google_calendar) { create(:google_calendar, user: registrant) }
@@ -18,12 +24,6 @@ RSpec.describe OutboundEventProcessing, type: :model do
                owner: registrant, 
                receiver: receiver, 
                google_calendar: current_google_calendar)
-      end
-    end
-
-    shared_context 'allow access to google calendar' do
-      before do
-        allow(GoogleCalendarConfig).to receive(:authorized_by?).with(any_args).and_return(true)
       end
     end
 
@@ -111,6 +111,13 @@ RSpec.describe OutboundEventProcessing, type: :model do
           outbound_event_processing.start
           expect(GoogleEventCreator.jobs.size).to eq 0
         end
+    end
+  end
+
+  describe '#update' do
+    context 'when event receiver has allowed access to their google calendar' do
+      include_context 'allow access to google calendar'
+      
     end
   end
 end
