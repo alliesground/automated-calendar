@@ -55,7 +55,11 @@ class OutboundEventProcessing
         receiver.id
       )
     else
-      GoogleEventCreater.perform_async()
+      GoogleEventCreator.perform_async(
+        event.id, 
+        receiver_google_calendar.id,
+        receiver.id
+      )
     end
   end
 
