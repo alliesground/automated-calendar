@@ -79,11 +79,8 @@ class EventRegistration
   end
 
   def google_calendar_id
-    @google_calendar_id ||= google_events.first.google_calendar_id
-  end
-
-  def google_events
-    event.google_events_for(registrant.google_calendars)
+    #@google_calendar_id ||= registrant_google_events.first.google_calendar_id
+    @google_calendar_id ||= event.google_events.by_user(registrant).first.google_calendar_id
   end
 
   def save(params)
@@ -115,6 +112,13 @@ class EventRegistration
     end
   end
 
+  def google_event
+    event.google_events.by_user_and_calendar_name(
+      registrant,
+      google_calendar.name
+    ).first
+  end
+
   def update(params)
     self.attributes = event_registration_params(params)
     event.attributes = params.slice(:title)
@@ -122,31 +126,51 @@ class EventRegistration
     if valid?
       save_event
 
-      registrant.outbound_event_configs.each do |outbound_event_config|
-        OutboundEventProcessing.new(
-          outbound_event_config, 
-          google_calendar,
-          event
-        ).update
-      end
-
-      return unless GoogleCalendarConfig.authorized_by?(registrant)
-
       if calendar_changed?
-        # destroy previous google event
-        google_events.first.delete
 
-        # create new google event for new updated calendar
+        # destroy all google events associated with previous calendar
+        event.google_events.by_calendar_name(previous_calendar.name).each do |google_event|
+          next unless GoogleCalendarConfig.authorized_by?(google_event.user)
+          # first GoogleEventDestroyer.perform_async
+          # and
+          # destroy locally
+          
+          google_event.destroy
+        end
+        
+        # create new google event for new updated calendar for receivers
+        registrant.outbound_event_configs.each do |outbound_event_config|
+          OutboundEventProcessing.new(
+            outbound_event_config, 
+            google_calendar,
+            event
+          ).start
+        end
+
+        return unless GoogleCalendarConfig.authorized_by?(registrant)
+
+        # create new google event for new updated calendar for registrant
         GoogleEventCreator.perform_async(
           event.id,
           google_calendar.id,
           registrant.id
         )
+
       else
+        registrant.outbound_event_configs.each do |outbound_event_config|
+          OutboundEventProcessing.new(
+            outbound_event_config, 
+            google_calendar,
+            event
+          ).update
+        end
+
+        return unless GoogleCalendarConfig.authorized_by?(registrant)
+
         GoogleEventUpdater.perform_async(
           event.id,
           google_calendar.remote_id,
-          google_events.first.remote_id,
+          event.google_events.by_user_and_calendar_name(registrant, google_calendar.name).first.remote_id,
           registrant.id
         )
       end
@@ -159,8 +183,12 @@ class EventRegistration
 
   private
 
+  def previous_calendar
+    event.google_events_for(registrant).first.google_calendar
+  end
+
   def calendar_changed?
-    google_events.first.google_calendar_id != google_calendar_id
+    event.google_events_for(registrant).first.google_calendar_id != google_calendar_id
   end
 
   def event_registration_params(params)

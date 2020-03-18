@@ -4,12 +4,11 @@ class OutboundEventProcessing
                 :event,
                 :current_google_calendar
 
-  def initialize(outbound_event_config, current_google_calendar, event, previous_event: nil)
+  def initialize(outbound_event_config, current_google_calendar, event)
     @outbound_event_config = outbound_event_config
     @receiver = outbound_event_config.receiver
     @event = event
     @current_google_calendar = current_google_calendar
-    @previous_event = previous_event
   end
 
   def start
@@ -30,25 +29,26 @@ class OutboundEventProcessing
   end
 
   def update
+
     if(outbound_event_config.configured_for?(current_google_calendar) &&
        GoogleCalendarConfig.authorized_by?(receiver))
 
-      # if calendar updated
-      event.google_events_for(receiver.google_calendars).each do |google_event|
-        if(google_event.google_calendar_id !=
-           current_google_calendar.id)
-        end
-      end
-
       if receiver.google_calendars.exist_with_name?(current_google_calendar.name)
 
-        event.google_events_for(receiver.google_calendars).each do |google_event|
+        google_event = event.google_events.by_user_and_calendar_name(
+          receiver,
+          current_google_calendar.name
+        ).first
+
+        if google_event.present?
           GoogleEventUpdater.perform_async(
             event.id,
             receiver_google_calendar.remote_id,
             google_event.remote_id,
             receiver.id
           )
+        else
+          GoogleEventCreater.perform_async()
         end
 
       else
@@ -70,6 +70,14 @@ class OutboundEventProcessing
   end
 
   private
+
+  def calendar_changed?
+    receiver_google_events.first.google_calendar_id != current_google_calendar.id
+  end
+
+  def receiver_google_events
+    event.google_events_for(receiver.google_calendars)
+  end
 
   def receiver_google_calendar
     receiver.google_calendars.find_by_lowercase_name(current_google_calendar.name).first

@@ -2,6 +2,19 @@ class GoogleEvent < ApplicationRecord
   belongs_to :event
   belongs_to :google_calendar
 
-  scope :find_by_user_google_calendars, ->(user_google_calendars) { where(google_calendar_id: user_google_calendars) }
+  scope :by_calendar_name, -> (calendar_name) {
+    where(google_calendar_id:  GoogleCalendar.find_by_lowercase_name(calendar_name).ids)
+  }
 
+  scope :by_user_and_calendar_name, -> (user, calendar_name) {
+    joins(:google_calendar).
+    merge(by_user(user)).
+    merge(GoogleCalendar.find_by_lowercase_name(calendar_name))
+  }
+
+  scope :by_user, -> (user) { where(google_calendar_id: user.google_calendars.ids) }
+
+  def user
+    google_calendar.user
+  end
 end

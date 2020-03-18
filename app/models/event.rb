@@ -4,7 +4,7 @@ class Event < ApplicationRecord
 
   validates_presence_of :title
 
-  def google_events_for(user_google_calendars)
-    google_events.find_by_user_google_calendars(user_google_calendars)
+  def google_events_for(user)
+    google_events.by_user(user)
   end
 end
