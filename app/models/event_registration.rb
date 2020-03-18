@@ -90,12 +90,10 @@ class EventRegistration
     if valid?
       save_event
 
-      registrant.outbound_event_configs.each do |outbound_event_config|
-        OutboundEventProcessing.new(
-          outbound_event_config, 
-          google_calendar,
-          event
-        ).start
+      registrant.outbound_event_configs_for(google_calendar)
+        .each do |outbound_event_config|
+
+        OutboundEventProcessing.new(outbound_event_config, event).start
       end
 
       return unless GoogleCalendarConfig.authorized_by?(registrant)
@@ -139,12 +137,10 @@ class EventRegistration
         end
         
         # create new google event for new updated calendar for receivers
-        registrant.outbound_event_configs.each do |outbound_event_config|
-          OutboundEventProcessing.new(
-            outbound_event_config, 
-            google_calendar,
-            event
-          ).start
+        registrant.outbound_event_configs_for(google_calendar)
+          .each do |outbound_event_config|
+
+          OutboundEventProcessing.new( outbound_event_config, event).start
         end
 
         return unless GoogleCalendarConfig.authorized_by?(registrant)
@@ -157,12 +153,11 @@ class EventRegistration
         )
 
       else
-        registrant.outbound_event_configs.each do |outbound_event_config|
-          OutboundEventProcessing.new(
-            outbound_event_config, 
-            google_calendar,
-            event
-          ).update
+
+        registrant.outbound_event_configs_for(google_calendar)
+          .each do |outbound_event_config|
+
+          OutboundEventProcessing.new(outbound_event_config, event).update
         end
 
         return unless GoogleCalendarConfig.authorized_by?(registrant)

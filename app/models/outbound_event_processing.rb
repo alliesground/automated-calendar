@@ -4,56 +4,50 @@ class OutboundEventProcessing
                 :event,
                 :current_google_calendar
 
-  def initialize(outbound_event_config, current_google_calendar, event)
+  def initialize(outbound_event_config, event)
     @outbound_event_config = outbound_event_config
     @receiver = outbound_event_config.receiver
     @event = event
-    @current_google_calendar = current_google_calendar
+    @current_google_calendar = outbound_event_config.google_calendar
   end
 
   def start
+    return unless GoogleCalendarConfig.authorized_by?(receiver)
 
-    if(outbound_event_config.configured_for?(current_google_calendar) &&
-       GoogleCalendarConfig.authorized_by?(receiver))
-
-      if receiver.google_calendars.exist_with_name?(current_google_calendar.name)
-        GoogleEventCreator.perform_async(
-          event.id, 
-          receiver_google_calendar.id,
-          receiver.id
-        )
-      else
-        create_google_calendar
-      end
+    if receiver.google_calendars.exist_with_name?(current_google_calendar.name)
+      GoogleEventCreator.perform_async(
+        event.id, 
+        receiver_google_calendar.id,
+        receiver.id
+      )
+    else
+      create_google_calendar
     end
   end
 
   def update
+    return unless GoogleCalendarConfig.authorized_by?(receiver)
 
-    if(outbound_event_config.configured_for?(current_google_calendar) &&
-       GoogleCalendarConfig.authorized_by?(receiver))
+    if receiver.google_calendars.exist_with_name?(current_google_calendar.name)
 
-      if receiver.google_calendars.exist_with_name?(current_google_calendar.name)
+      google_event = event.google_events.by_user_and_calendar_name(
+        receiver,
+        current_google_calendar.name
+      ).first
 
-        google_event = event.google_events.by_user_and_calendar_name(
-          receiver,
-          current_google_calendar.name
-        ).first
-
-        if google_event.present?
-          GoogleEventUpdater.perform_async(
-            event.id,
-            receiver_google_calendar.remote_id,
-            google_event.remote_id,
-            receiver.id
-          )
-        else
-          GoogleEventCreater.perform_async()
-        end
-
+      if google_event.present?
+        GoogleEventUpdater.perform_async(
+          event.id,
+          receiver_google_calendar.remote_id,
+          google_event.remote_id,
+          receiver.id
+        )
       else
-        create_google_calendar
+        GoogleEventCreater.perform_async()
       end
+
+    else
+      create_google_calendar
     end
   end
 

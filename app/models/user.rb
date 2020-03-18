@@ -8,4 +8,8 @@ class User < ApplicationRecord
   has_many :events
   has_many :google_calendars
   has_many :outbound_event_configs, foreign_key: 'owner_id'
+
+  def outbound_event_configs_for(google_calendar)
+    outbound_event_configs.by_google_calendar(google_calendar)
+  end
 end

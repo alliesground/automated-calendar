@@ -1,6 +1,7 @@
 require 'rails_helper'
 
 RSpec.describe OutboundEventProcessing, type: :model do
+
   describe '#start' do
     let(:registrant) { create(:user) }
     let(:current_google_calendar) { create(:google_calendar, user: registrant) }
@@ -8,11 +9,7 @@ RSpec.describe OutboundEventProcessing, type: :model do
     let(:event) { create(:event, user: registrant) }
 
     let!(:outbound_event_processing) do
-      OutboundEventProcessing.new(
-        outbound_event_config,
-        current_google_calendar,
-        event
-      )
+      OutboundEventProcessing.new(outbound_event_config, event)
     end
 
     shared_context 'create outbound_event_config for current google_calendar' do

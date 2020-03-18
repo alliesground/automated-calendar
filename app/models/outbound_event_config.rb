@@ -5,7 +5,7 @@ class OutboundEventConfig < ApplicationRecord
 
   validates :receiver_id, uniqueness: { scope: :google_calendar_id }
 
-  def configured_for?(current_google_calendar)
-    google_calendar_id == current_google_calendar.id
+  scope :by_google_calendar, -> (google_calendar) do
+    where(google_calendar: google_calendar)
   end
 end
