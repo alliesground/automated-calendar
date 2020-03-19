@@ -23,11 +23,9 @@ class OutboundEventProcessing
       return
     end
 
-    GoogleEventCreator.perform_async(
-      event.id, 
-      receiver_google_calendar.id,
-      receiver.id
-    )
+    google_event = create_google_event
+
+    GoogleEventCreator.perform_async(google_event.id)
   end
 
   def update
@@ -55,11 +53,9 @@ class OutboundEventProcessing
         receiver.id
       )
     else
-      GoogleEventCreator.perform_async(
-        event.id, 
-        receiver_google_calendar.id,
-        receiver.id
-      )
+      google_event = create_google_event
+
+      GoogleEventCreator.perform_async(google_event.id)
     end
   end
 
@@ -67,15 +63,23 @@ class OutboundEventProcessing
     def on_success(_status, options)
       google_calendar = GoogleCalendar.find_by(id: options['google_calendar_id'])
 
-      GoogleEventCreator.perform_async(
-        options['event_id'], 
-        google_calendar.id,
-        options['receiver_id']
+      event = Event.find_by(id: options['event_id'])
+
+      google_event = event.google_events.create(
+        google_calendar_id: google_calendar.id
       )
+
+      GoogleEventCreator.perform_async(google_event.id)
     end
   end
 
   private
+
+  def create_google_event
+    event.google_events.create(
+      google_calendar_id: receiver_google_calendar.id
+    )
+  end
 
   def calendar_changed?
     receiver_google_events.first.google_calendar_id != current_google_calendar.id

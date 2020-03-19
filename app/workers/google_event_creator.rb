@@ -33,6 +33,7 @@ class GoogleEventCreator
       remote_event
     )
 
-    event.google_events.update(remote_id: response.id)
+    event.google_events.find_by(id: google_event_id)
+      .update(remote_id: response.id)
   end
 end

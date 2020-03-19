@@ -63,6 +63,19 @@ class EventsController < ApplicationController
   end
 
   def destroy
+    @event.google_events.each do |google_event|
+
+      next unless GoogleCalendarConfig.authorized_by?(google_event.user)
+
+      GoogleEventDestroyer.perform_async(
+        google_event.user.id,
+        google_event.google_calendar.remote_id,
+        google_event.remote_id
+      )
+      
+      google_event.destroy
+    end
+
     @event.destroy
 
     if @event.destroyed?

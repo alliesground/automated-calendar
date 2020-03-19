@@ -40,9 +40,7 @@ RSpec.describe OutboundEventProcessing, type: :model do
           outbound_event_processing.start
 
           expect(GoogleEventCreator).to have_enqueued_sidekiq_job(
-            event.id,
-            google_calendar.id,
-            receiver.id
+            GoogleEvent.last.id
           )
         end
       end
@@ -83,12 +81,8 @@ RSpec.describe OutboundEventProcessing, type: :model do
           )
 
           expect(GoogleEventCreator).to have_enqueued_sidekiq_job(
-            Event.last.id,
-            receiver.google_calendars.last.id,
-            receiver.id
+            GoogleEvent.last.id
           )
-
-          expect(GoogleEventCreator.jobs.last['args'][1]).not_to be_nil
         end
       end
     end
@@ -138,9 +132,7 @@ RSpec.describe OutboundEventProcessing, type: :model do
             outbound_event_processing.update
 
             expect(GoogleEventCreator).to have_enqueued_sidekiq_job(
-              Event.last.id,
-              receiver.google_calendars.last.id,
-              receiver.id
+              GoogleEvent.last.id
             )
           end
         end
