@@ -45,6 +45,12 @@ class GoogleCalWrapper
     end
   end
 
+  def delete_event(cal_id, event_id)
+    get_service do |service|
+      service.delete_event(cal_id, event_id)
+    end
+  end
+
   def client
     @client ||= Signet::OAuth2::Client.new(client_options)
   end

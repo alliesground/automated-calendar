@@ -132,9 +132,12 @@ class EventRegistration
         # destroy all google events associated with previous calendar
         event.google_events.by_calendar_name(previous_calendar.name).each do |google_event|
           next unless GoogleCalendarConfig.authorized_by?(google_event.user)
-          # first GoogleEventDestroyer.perform_async
-          # and
-          # destroy locally
+
+          GoogleEventDestroyer.perform_async(
+            google_event.user.id,
+            google_event.google_calendar.remote_id,
+            google_event.remote_id
+          )
           
           google_event.destroy
         end

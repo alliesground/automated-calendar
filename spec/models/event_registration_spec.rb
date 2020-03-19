@@ -107,7 +107,7 @@ RSpec.describe EventRegistration, type: :model do
         end
 
         describe 'destroying google_events associated with previous calendar' do
-          context 'when users have allowed access their to google calendar' do
+          context 'when users have allowed access to their google calendar' do
             include_context 'allow access to google calendar'
 
             it 'destroys all local google_events associated with current event and previous calendar name for all users' do
@@ -117,7 +117,15 @@ RSpec.describe EventRegistration, type: :model do
               }.to change{GoogleEvent.count}.by -2
             end
 
-            it 'calls GoogleEventDestroyer worker for all google_events associated with current event and previous calendar name for all users'
+            it 'calls GoogleEventDestroyer worker for each google_events associated with current event and previous calendar name for all users' do
+              event_registration.update(update_params)
+
+              expect(GoogleEventDestroyer).to have_enqueued_sidekiq_job(
+                registrant.id,
+                registrant_google_calendar.remote_id,
+                registrant_google_events.first.remote_id
+              )
+            end
 
           end
         end
