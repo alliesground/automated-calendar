@@ -100,23 +100,16 @@ class EventRegistration
 
       return unless GoogleCalendarConfig.authorized_by?(registrant)
 
-      GoogleEventCreator.perform_async(
-        event.id,
-        google_calendar.id,
-        registrant.id
-      )
+      google_event = event.
+                     google_events.
+                     create(google_calendar_id: google_calendar.id)
+
+      GoogleEventCreator.perform_async(google_event.id)
 
       true
     else
       false
     end
-  end
-
-  def google_event
-    event.google_events.by_user_and_calendar_name(
-      registrant,
-      google_calendar.name
-    ).first
   end
 
   def update(params)
@@ -152,11 +145,11 @@ class EventRegistration
         return unless GoogleCalendarConfig.authorized_by?(registrant)
 
         # create new google event for new updated calendar for registrant
-        GoogleEventCreator.perform_async(
-          event.id,
-          google_calendar.id,
-          registrant.id
-        )
+        google_event = event.
+                       google_events.
+                       create(google_calendar_id: google_calendar.id)
+
+        GoogleEventCreator.perform_async(google_event.id)
 
       else
 

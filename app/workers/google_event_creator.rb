@@ -4,12 +4,15 @@ class GoogleEventCreator
   include Rails.application.routes.url_helpers
   include Sidekiq::Worker
 
-  def perform(event_id, google_cal_id, event_receiver_id)
+  def perform(google_event_id)
 
     time_zone = 'Australia/Melbourne'
-    event = Event.find_by(id: event_id)
-    event_receiver = User.find_by(id: event_receiver_id)
-    google_calendar = GoogleCalendar.find(google_cal_id)
+    
+    google_event = GoogleEvent.find_by(id: google_event_id)
+
+    event = google_event.event
+    event_receiver = google_event.user
+    google_calendar = google_event.google_calendar
 
     google_cal_wrapper = GoogleCalWrapper.new(event_receiver)
 
@@ -30,7 +33,6 @@ class GoogleEventCreator
       remote_event
     )
 
-    event.google_events.create(remote_id: response.id, 
-                               google_calendar_id: google_cal_id)
+    event.google_events.update(remote_id: response.id)
   end
 end

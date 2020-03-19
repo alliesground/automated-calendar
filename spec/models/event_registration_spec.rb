@@ -46,6 +46,24 @@ RSpec.describe EventRegistration, type: :model do
           event_registration.save(params)
         end
       end
+
+      context 'when registrant has allowed access to their google calendar' do
+        include_context 'allow access to google calendar'
+
+          it 'creates google event' do
+            expect{
+              event_registration.save(params)
+            }.to change{GoogleEvent.count}.by 1
+          end
+
+          it 'calls GoogleEventCreator worker with corrent args' do
+            event_registration.save(params)
+
+            expect(GoogleEventCreator).to have_enqueued_sidekiq_job(
+              GoogleEvent.last.id
+            )
+          end
+      end
     end
   end
 
@@ -112,9 +130,16 @@ RSpec.describe EventRegistration, type: :model do
 
             it 'destroys all local google_events associated with current event and previous calendar name for all users' do
 
-              expect{
-                event_registration.update(update_params)
-              }.to change{GoogleEvent.count}.by -2
+              event_registration.update(update_params)
+
+              google_events = Event.
+                              last.
+                              google_events.
+                              by_calendar_name(
+                                registrant_google_calendar.name
+                              )
+
+              expect(google_events.count).to be 0
             end
 
             it 'calls GoogleEventDestroyer worker for each google_events associated with current event and previous calendar name for all users' do
@@ -139,9 +164,7 @@ RSpec.describe EventRegistration, type: :model do
               event_registration.update(update_params)
 
               expect(GoogleEventCreator).to have_enqueued_sidekiq_job(
-                registrant_event.id,
-                registrant_another_google_calendar.id,
-                registrant.id
+                GoogleEvent.last.id
               )
             end
           end
