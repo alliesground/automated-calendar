@@ -6,13 +6,14 @@ class GoogleEvent < ApplicationRecord
     where(google_calendar_id:  GoogleCalendar.by_lowercase_name(calendar_name).ids)
   }
 
+  scope :by_user, -> (user) { where(google_calendar_id: user.google_calendars.ids) }
+
   scope :by_user_and_calendar_name, -> (user, calendar_name) {
     joins(:google_calendar).
     merge(by_user(user)).
-    merge(GoogleCalendar.by_lowercase_name(calendar_name))
+    merge(GoogleCalendar.by_lowercase_name(calendar_name)).
+    last
   }
-
-  scope :by_user, -> (user) { where(google_calendar_id: user.google_calendars.ids) }
 
   def user
     google_calendar.user

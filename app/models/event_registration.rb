@@ -164,7 +164,8 @@ class EventRegistration
         GoogleEventUpdater.perform_async(
           event.id,
           google_calendar.remote_id,
-          event.google_events.by_user_and_calendar_name(registrant, google_calendar.name).first.remote_id,
+          event.google_events.
+                by_user_and_calendar_name(registrant, google_calendar.name).remote_id,
           registrant.id
         )
       end

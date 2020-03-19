@@ -40,10 +40,12 @@ class OutboundEventProcessing
       return
     end
 
-    google_event = event.google_events.by_user_and_calendar_name(
-      receiver,
-      current_google_calendar.name
-    ).first
+    google_event = event.
+                   google_events.
+                   by_user_and_calendar_name(
+                     receiver,
+                     current_google_calendar.name
+                  )
 
     if google_event.present?
       GoogleEventUpdater.perform_async(
