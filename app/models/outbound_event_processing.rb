@@ -83,14 +83,6 @@ class OutboundEventProcessing
     )
   end
 
-  def calendar_changed?
-    receiver_google_events.first.google_calendar_id != current_google_calendar.id
-  end
-
-  def receiver_google_events
-    event.google_events_for(receiver.google_calendars)
-  end
-
   def receiver_google_calendar
     receiver.google_calendars.by_lowercase_name(current_google_calendar.name).first
   end
