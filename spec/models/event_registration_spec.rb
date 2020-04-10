@@ -50,19 +50,19 @@ RSpec.describe EventRegistration, type: :model do
       context 'when registrant has allowed access to their google calendar' do
         include_context 'allow access to google calendar'
 
-          it 'creates google event' do
-            expect{
-              event_registration.save(params)
-            }.to change{GoogleEvent.count}.by 1
-          end
-
-          it 'calls GoogleEventCreator worker with corrent args' do
+        it 'creates google event' do
+          expect{
             event_registration.save(params)
+          }.to change{GoogleEvent.count}.by 1
+        end
 
-            expect(GoogleEventCreator).to have_enqueued_sidekiq_job(
-              GoogleEvent.last.id
-            )
-          end
+        it 'calls GoogleEventCreator worker with corrent args' do
+          event_registration.save(params)
+
+          expect(GoogleEventCreator).to have_enqueued_sidekiq_job(
+            GoogleEvent.last.id
+          )
+        end
       end
     end
   end

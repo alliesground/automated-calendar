@@ -2,6 +2,8 @@ class GoogleEvent < ApplicationRecord
   belongs_to :event
   belongs_to :google_calendar
 
+  before_destroy :destroy_remote_google_event
+
   scope :by_calendar_name, -> (calendar_name) {
     where(google_calendar_id:  GoogleCalendar.by_lowercase_name(calendar_name).ids)
   }
@@ -17,5 +19,17 @@ class GoogleEvent < ApplicationRecord
 
   def user
     google_calendar.user
+  end
+
+  private
+
+  def destroy_remote_google_event
+    return unless GoogleCalendarConfig.authorized_by?(user)
+
+    GoogleEventDestroyer.perform_async(
+      user.id,
+      google_calendar.remote_id,
+      remote_id
+    )
   end
 end

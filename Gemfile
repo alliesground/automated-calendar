@@ -34,6 +34,7 @@ gem 'pry'
 gem "simple_calendar", "~> 2.0"
 gem 'sidekiq', '~> 5.2', '>= 5.2.7'
 gem 'sidekiq-batch'
+gem 'faker', '~> 1.6', '>= 1.6.6'
 
 group :development, :test do
   # Call 'byebug' anywhere in the code to stop execution and get a debugger console
