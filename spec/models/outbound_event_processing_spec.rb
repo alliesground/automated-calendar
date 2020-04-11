@@ -20,7 +20,7 @@ RSpec.describe OutboundEventProcessing, type: :model do
 
   shared_context 'allow access to google calendar' do
     before do
-      allow(GoogleCalendarConfig).to receive(:authorized_by?).with(any_args).and_return(true)
+      stub_access_to_google_calendar
     end
   end
 
