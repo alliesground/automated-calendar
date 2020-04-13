@@ -25,7 +25,7 @@ RSpec.describe OutboundEventProcessing, type: :model do
   end
 
   shared_context 'create google calendar with name matching current google calendar' do
-    let!(:google_calendar) {create(:google_calendar, user: receiver, remote_id: 'testing')}
+    let!(:receiver_google_calendar) {create(:google_calendar, user: receiver, remote_id: 'testing')}
   end
 
   describe '#start' do
@@ -36,12 +36,10 @@ RSpec.describe OutboundEventProcessing, type: :model do
       context 'when receiver has a google calendar with name matching given google calendar name' do
         include_context 'create google calendar with name matching current google calendar'
 
-        it 'enqueus GoogleEventCreator worker job' do
+        it 'creates a google event associated with the give calendar' do
           outbound_event_processing.start
 
-          expect(GoogleEventCreator).to have_enqueued_sidekiq_job(
-            GoogleEvent.last.id
-          )
+          expect(GoogleEvent.last.google_calendar).to eq receiver_google_calendar
         end
       end
 
@@ -112,7 +110,7 @@ RSpec.describe OutboundEventProcessing, type: :model do
           let!(:google_event) do 
             create(:google_event,
                    event: event,
-                   google_calendar: google_calendar)
+                   google_calendar: receiver_google_calendar)
           end
 
           it 'calls GoogleEventUpdater worker' do

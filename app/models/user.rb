@@ -12,4 +12,8 @@ class User < ApplicationRecord
   def outbound_event_configs_for(google_calendar)
     outbound_event_configs.by_google_calendar(google_calendar)
   end
+
+  def has_google_calendar_with_name?(calendar_name)
+    google_calendars.by_lowercase_name(calendar_name).present?
+  end
 end

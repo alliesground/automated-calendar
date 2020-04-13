@@ -11,31 +11,23 @@ class OutboundEventProcessing
     @current_google_calendar = outbound_event_config.google_calendar
   end
 
-  def start
+  def start 
     return unless GoogleCalendarConfig.authorized_by?(receiver)
 
-    unless receiver
-      .google_calendars
-      .by_lowercase_name(current_google_calendar.name)
-      .present?
-
+    unless receiver.has_google_calendar_with_name?(current_google_calendar.name)
       create_google_calendar
       return
-    end
+    end 
 
-    google_event = create_google_event
-
-    GoogleEventCreator.perform_async(google_event.id)
+    event.google_events.create(
+      google_calendar_id: receiver_google_calendar.id
+    )
   end
 
   def update
     return unless GoogleCalendarConfig.authorized_by?(receiver)
 
-    unless receiver
-      .google_calendars
-      .by_lowercase_name(current_google_calendar.name)
-      .present?
-
+    unless receiver.has_google_calendar_with_name?(current_google_calendar.name)
       create_google_calendar
       return
     end
@@ -55,9 +47,9 @@ class OutboundEventProcessing
         receiver.id
       )
     else
-      google_event = create_google_event
-
-      GoogleEventCreator.perform_async(google_event.id)
+      event.google_events.create(
+        google_calendar_id: receiver_google_calendar.id
+      )
     end
   end
 
@@ -67,21 +59,11 @@ class OutboundEventProcessing
 
       event = Event.find_by(id: options['event_id'])
 
-      google_event = event.google_events.create(
-        google_calendar_id: google_calendar.id
-      )
-
-      GoogleEventCreator.perform_async(google_event.id)
+      event.google_events.create(google_calendar_id: google_calendar.id)
     end
   end
 
   private
-
-  def create_google_event
-    event.google_events.create(
-      google_calendar_id: receiver_google_calendar.id
-    )
-  end
 
   def receiver_google_calendar
     receiver.google_calendars.by_lowercase_name(current_google_calendar.name).first
