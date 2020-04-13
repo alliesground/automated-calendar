@@ -73,21 +73,16 @@ RSpec.describe EventRegistration, type: :model do
       params.merge(
         title: 'updated title'
       )
-    end
-
-    let(:update_params_with_calendar_change) do
-      params.merge(
-        title: 'updated title',
-        google_calendar_id: registrant_another_google_calendar.id
-      )
-    end
+    end 
 
     let!(:registrant_event) { create(:event, user: registrant) }
+
     let(:registrant_another_google_calendar) do 
       create(:google_calendar, 
              user: registrant, 
              name: 'another test calendar') 
     end
+
     let!(:receiver_google_calendar) { create(:google_calendar,
                                              user: receiver) }
 
@@ -96,6 +91,7 @@ RSpec.describe EventRegistration, type: :model do
               event: registrant_event,
               google_calendar: registrant_google_calendar)]
     end
+
     let!(:receiver_google_events) do
       [create(:google_event,
               event: registrant_event,
@@ -117,7 +113,7 @@ RSpec.describe EventRegistration, type: :model do
       end
 
       context 'when calendar is changed' do
-        let(:update_params) do
+        let(:update_params_with_calendar_change) do
           params.merge(
             title: 'updated title',
             google_calendar_id: registrant_another_google_calendar.id
@@ -130,7 +126,7 @@ RSpec.describe EventRegistration, type: :model do
 
             it 'destroys all local google_events associated with current event and previous calendar name for all users' do
 
-              event_registration.update(update_params)
+              event_registration.update(update_params_with_calendar_change)
 
               google_events = Event.
                               last.
@@ -141,17 +137,6 @@ RSpec.describe EventRegistration, type: :model do
 
               expect(google_events.count).to be 0
             end
-
-            it 'calls GoogleEventDestroyer worker for each google_events associated with current event and previous calendar name for all users' do
-              event_registration.update(update_params)
-
-              expect(GoogleEventDestroyer).to have_enqueued_sidekiq_job(
-                registrant.id,
-                registrant_google_calendar.remote_id,
-                registrant_google_events.first.remote_id
-              )
-            end
-
           end
         end
 
@@ -159,13 +144,9 @@ RSpec.describe EventRegistration, type: :model do
           context 'when registrant has allowed access to their google calendar' do
             include_context 'allow access to google calendar'
 
-            it 'calls GoogleEventCreator worker for registrant' do
-
-              event_registration.update(update_params)
-
-              expect(GoogleEventCreator).to have_enqueued_sidekiq_job(
-                GoogleEvent.last.id
-              )
+            it 'creates google event' do
+              event_registration.update(update_params_with_calendar_change) 
+              expect(GoogleEvent.last.user).to eq registrant 
             end
           end
         end
@@ -180,7 +161,7 @@ RSpec.describe EventRegistration, type: :model do
               expect_any_instance_of(OutboundEventProcessing).
                 to receive(:start)
 
-              event_registration.update(update_params)
+              event_registration.update(update_params_with_calendar_change)
             end
           end
         end

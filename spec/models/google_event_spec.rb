@@ -14,24 +14,30 @@ RSpec.describe GoogleEvent, type: :model do
     end
   end
 
-  shared_context 'destroy' do
-    before {google_event.destroy}
+  describe 'before_destroy' do
+    context 'when user has authorized access to their google calendar' do
+      include_context 'allow access to google calendar'
+
+      it 'calls GoogleEventDestroyer worker with correct args' do
+        google_event.destroy
+
+        expect(GoogleEventDestroyer).to have_enqueued_sidekiq_job(
+          user.id,
+          google_calendar.remote_id,
+          google_event.remote_id
+        )
+      end
+    end
   end
-  
-  context 'before destroy' do
-    describe '#destroy_remote_google_event' do
-      context 'when user has authorized access to their google calendar' do
-        include_context 'allow access to google calendar'
-        include_context 'destroy'
 
-        it 'calls GoogleEventDestroyer worker with correct args' do
+  describe 'after_create_commit' do
+    context 'when user has authorized access to their google calendar' do
+      include_context 'allow access to google calendar'
 
-          expect(GoogleEventDestroyer).to have_enqueued_sidekiq_job(
-            user.id,
-            google_calendar.remote_id,
-            google_event.remote_id
-          )
-        end
+      it 'calls GoogleEventCreator worker with correct args' do
+        expect(GoogleEventCreator).to have_enqueued_sidekiq_job(
+          google_event.id
+        )
       end
     end
   end
