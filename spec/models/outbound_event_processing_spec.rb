@@ -14,126 +14,57 @@ RSpec.describe OutboundEventProcessing, type: :model do
            google_calendar: current_google_calendar)
   end
 
-  let!(:outbound_event_processing) do
-    OutboundEventProcessing.new(outbound_event_config, event)
-  end
-
   shared_context 'allow access to google calendar' do
     before do
       stub_access_to_google_calendar
     end
   end
 
-  shared_context 'create google calendar with name matching current google calendar' do
+  shared_context 'create google calendar with name matching current google calendar name' do
     let!(:receiver_google_calendar) {create(:google_calendar, user: receiver, remote_id: 'testing')}
   end
 
-  describe '#start' do
-
-    context 'when event receiver has allowed access to their google calendar' do
+  describe '.execute' do
+    context 'when receiver has allowed access to their google calendar' do
       include_context 'allow access to google calendar'
 
-      context 'when receiver has a google calendar with name matching given google calendar name' do
-        include_context 'create google calendar with name matching current google calendar'
+      context 'when receiver has a google calendar with name matching the current google calendar name' do
+        include_context 'create google calendar with name matching current google calendar name'
 
-        it 'creates a google event associated with the give calendar' do
-          outbound_event_processing.start
+        context 'when receiver has a google event associated with current event and current google calendar name'do
 
-          expect(GoogleEvent.last.google_calendar).to eq receiver_google_calendar
-        end
-      end
-
-      context 'when receiver does not have a google calendar with matching current google calendar name' do
-
-        it 'creates local google calendar for event receiver' do
-          expect{ outbound_event_processing.start }.to change { GoogleCalendar.count }.by(1) 
-        end
-
-        it 'enqueus GoogleCalendarCreator worker job' do
-          outbound_event_processing.start
-
-          expect(GoogleCalendarCreator).to have_enqueued_sidekiq_job(
-            receiver.google_calendars.last.id,
-            receiver.google_calendars.last.name,
-            receiver.id
-          )
-        end
-
-        it 'enqueus GoogleEventCreator worker job after GoogleCalendarCreator worker successfully executes' do
-          outbound_event_processing.start
-
-          b = Sidekiq::Batch.new
-          b.on(:success,
-               OutboundEventProcessing::CalendarCreationCallback,
-               'google_calendar_id' => receiver.google_calendars.last.id,
-               'receiver_id' => receiver.id,
-               'event_id' => event.id)
-
-          OutboundEventProcessing::CalendarCreationCallback.new.on_success(
-            Sidekiq::Batch::Status.new(b.bid),
-            {
-              'google_calendar_id' => receiver.google_calendars.last.id,
-              'receiver_id' => receiver.id,
-              'event_id' => event.id
-            }
-          )
-
-          expect(GoogleEventCreator).to have_enqueued_sidekiq_job(
-            GoogleEvent.last.id
-          )
-        end
-      end
-    end
-
-    context 'when event receiver has not allowed access to their google calendar' do
-        before do
-          allow(GoogleCalendarConfig).to receive(:authorized_by?).with(any_args).and_return(false)
-        end
-
-        include_context 'create google calendar with name matching current google calendar'
-
-        it 'does not enqueu GoogleEventCreator worker job' do
-          outbound_event_processing.start
-          expect(GoogleEventCreator.jobs.size).to eq 0
-        end
-    end
-  end
-
-  describe '#update' do
-    context 'when event receiver has allowed access to their google calendar' do
-      include_context 'allow access to google calendar'
-
-      context 'when receiver has a google calendar with name matching given google calendar name' do
-        include_context 'create google calendar with name matching current google calendar'
-        
-        context "when receiver's google calendar has the google event" do
-          let!(:google_event) do 
-            create(:google_event,
+          let!(:google_event) do
+            create(:google_event, 
                    event: event,
                    google_calendar: receiver_google_calendar)
           end
 
           it 'calls GoogleEventUpdater worker' do
-            outbound_event_processing.update
+            OutboundEventProcessing.execute(outbound_event_config, event)
 
             expect(GoogleEventUpdater).to have_enqueued_sidekiq_job(
-              Event.last.id,
-              receiver.google_calendars.last.remote_id,
+              event.id,
+              receiver_google_calendar.remote_id,
               google_event.remote_id,
               receiver.id
             )
           end
         end
 
-        context "when receiver's google calendar does not have the google event" do
-          it 'calls GoogleEventCreator worker' do
-            outbound_event_processing.update
+        context 'when receiver does not have a google event associated with current event and current google calendar name'do
+          it 'creates a google event' do
+            OutboundEventProcessing.execute(outbound_event_config, event)
 
-            expect(GoogleEventCreator).to have_enqueued_sidekiq_job(
-              GoogleEvent.last.id
-            )
+            google_event = event.
+                           google_events.
+                           by_user(receiver).
+                           by_calendar_name(current_google_calendar.name).
+                           first
+
+            expect(google_event).to_not be nil
           end
         end
+
       end
     end
   end

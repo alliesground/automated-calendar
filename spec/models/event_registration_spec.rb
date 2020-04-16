@@ -2,7 +2,6 @@ require 'rails_helper'
 
 RSpec.describe EventRegistration, type: :model do
   let(:registrant) { create(:user) }
-  let(:receiver) { create(:user, email: 'receiver@email.com') }
   let!(:registrant_google_calendar) { create(:google_calendar, user: registrant) }
   let(:params) do
     {
@@ -21,7 +20,7 @@ RSpec.describe EventRegistration, type: :model do
       create(:outbound_event_config, 
              owner: registrant, 
              receiver: outbound_event_receiver,
-             google_calendar: google_calendar)
+             google_calendar: registrant_google_calendar)
     end
   end
 
@@ -41,8 +40,8 @@ RSpec.describe EventRegistration, type: :model do
         end
 
         it 'starts outbound event processing' do
+          expect(OutboundEventProcessing).to receive(:execute)
 
-          expect_any_instance_of(OutboundEventProcessing).to receive(:start).with(no_args)
           event_registration.save(params)
         end
       end
@@ -83,19 +82,10 @@ RSpec.describe EventRegistration, type: :model do
              name: 'another test calendar') 
     end
 
-    let!(:receiver_google_calendar) { create(:google_calendar,
-                                             user: receiver) }
-
     let!(:registrant_google_events) do
       [create(:google_event,
               event: registrant_event,
               google_calendar: registrant_google_calendar)]
-    end
-
-    let!(:receiver_google_events) do
-      [create(:google_event,
-              event: registrant_event,
-              google_calendar: receiver_google_calendar)]
     end
 
     let(:event_registration) do
@@ -103,6 +93,15 @@ RSpec.describe EventRegistration, type: :model do
         event: registrant_event,
         registrant: registrant
       ) end
+
+    shared_context 'update params with new calendar' do
+      let(:update_params_with_calendar_change) do
+        params.merge(
+          title: 'updated title',
+          google_calendar_id: registrant_another_google_calendar.id
+        )
+      end
+    end
 
     context 'with valid arguments' do
 
@@ -112,79 +111,12 @@ RSpec.describe EventRegistration, type: :model do
         expect(registrant_event.title).to eq update_params[:title]
       end
 
-      context 'when calendar is changed' do
-        let(:update_params_with_calendar_change) do
-          params.merge(
-            title: 'updated title',
-            google_calendar_id: registrant_another_google_calendar.id
-          )
-        end
+      context 'when registrant has allowed access to their google calendar' do
+        include_context 'allow access to google calendar'
 
-        describe 'destroying google_events associated with previous calendar' do
-          context 'when users have allowed access to their google calendar' do
-            include_context 'allow access to google calendar'
+        context 'when registrant has a google event associated with current event and current calendar' do
 
-            it 'destroys all local google_events associated with current event and previous calendar name for all users' do
-
-              event_registration.update(update_params_with_calendar_change)
-
-              google_events = Event.
-                              last.
-                              google_events.
-                              by_calendar_name(
-                                registrant_google_calendar.name
-                              )
-
-              expect(google_events.count).to be 0
-            end
-          end
-        end
-
-        describe 'creating google event for registrant' do
-          context 'when registrant has allowed access to their google calendar' do
-            include_context 'allow access to google calendar'
-
-            it 'creates google event' do
-              event_registration.update(update_params_with_calendar_change) 
-              expect(GoogleEvent.last.user).to eq registrant 
-            end
-          end
-        end
-
-        describe 'staring outbound events creation for new calendar' do
-          context 'when registrant has outbound events configured' do
-            include_context 'configure outbound_event_config' do
-              let(:google_calendar) { registrant_another_google_calendar }
-            end
-
-            it 'calls OutboundEventProcessing #start' do
-              expect_any_instance_of(OutboundEventProcessing).
-                to receive(:start)
-
-              event_registration.update(update_params_with_calendar_change)
-            end
-          end
-        end
-      end
-
-      context 'when calendar is not changed' do
-        context 'when registrant has outbound events configured' do
-          include_context 'configure outbound_event_config' do
-            let(:google_calendar) { registrant_google_calendar }
-          end
-
-          it 'starts outbound event update processing' do
-            expect_any_instance_of(OutboundEventProcessing).
-              to receive(:update)
-
-            event_registration.update(update_params)
-          end
-        end
-
-        context 'when registrant has allowed access to their google calendar' do
-          include_context 'allow access to google calendar'
-
-          it 'calls GoogleEventUpdater worker for registrant' do
+          it 'calls GoogleEventUpdater worker' do
 
             event_registration.update(update_params)
 
@@ -196,8 +128,54 @@ RSpec.describe EventRegistration, type: :model do
             )
           end
         end
+
+        context 'when registrant does not have google event associated with current event and current calendar' do
+          include_context 'update params with new calendar'
+
+          it 'creates a google event for the registrant associated with current event and new calendar' do
+            event_registration.update(update_params_with_calendar_change)
+
+            google_event = registrant_event.
+                            google_events.
+                            by_user(registrant).
+                            by_calendar_name(registrant_another_google_calendar.name)
+
+            expect(google_event.count).to_not be nil
+          end
+        end
+
       end
 
+      context 'when registrant has outbound events configured' do
+        include_context 'configure outbound_event_config'
+
+        it 'executes OutboundEventProcessing' do
+          expect(OutboundEventProcessing).to receive(:execute)
+
+          event_registration.update(update_params)
+        end
+      end
+
+      context 'when calendar is changed' do
+        include_context 'update params with new calendar' 
+
+        context 'when users have allowed access to their google calendar' do
+          include_context 'allow access to google calendar'
+
+          it 'destroys all local google_events associated with current event and previous calendar name for all users' do
+
+            event_registration.update(update_params_with_calendar_change)
+
+            google_events = registrant_event.
+                            google_events.
+                            by_calendar_name(
+                              registrant_google_calendar.name
+                            )
+
+            expect(google_events.count).to be 0
+          end
+        end
+      end
     end
   end
 end

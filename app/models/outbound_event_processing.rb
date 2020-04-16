@@ -1,30 +1,21 @@
 class OutboundEventProcessing
   attr_accessor :outbound_event_config,
-                :receiver,
                 :event,
+                :receiver,
                 :current_google_calendar
 
   def initialize(outbound_event_config, event)
     @outbound_event_config = outbound_event_config
-    @receiver = outbound_event_config.receiver
     @event = event
+    @receiver = outbound_event_config.receiver
     @current_google_calendar = outbound_event_config.google_calendar
   end
 
-  def start 
-    return unless GoogleCalendarConfig.authorized_by?(receiver)
-
-    unless receiver.has_google_calendar_with_name?(current_google_calendar.name)
-      create_google_calendar
-      return
-    end 
-
-    event.google_events.create(
-      google_calendar_id: receiver_google_calendar.id
-    )
+  def self.execute(*args)
+    new(*args).execute
   end
 
-  def update
+  def execute
     return unless GoogleCalendarConfig.authorized_by?(receiver)
 
     unless receiver.has_google_calendar_with_name?(current_google_calendar.name)
@@ -34,10 +25,10 @@ class OutboundEventProcessing
 
     google_event = event.
                    google_events.
-                   by_user_and_calendar_name(
-                     receiver,
-                     current_google_calendar.name
-                  )
+                   by_user(receiver).
+                   by_calendar_name(current_google_calendar.name).
+                   first
+
 
     if google_event.present?
       GoogleEventUpdater.perform_async(
@@ -90,5 +81,4 @@ class OutboundEventProcessing
       )
     end
   end
-
 end

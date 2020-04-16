@@ -95,16 +95,15 @@ class EventRegistration
       registrant.outbound_event_configs_for(google_calendar)
         .each do |outbound_event_config|
 
-        OutboundEventProcessing.new(outbound_event_config, event).start
+        OutboundEventProcessing.execute(
+          outbound_event_config,
+          event
+        )
       end
 
       return unless GoogleCalendarConfig.authorized_by?(registrant)
 
-      google_event = event.
-                     google_events.
-                     create(google_calendar_id: google_calendar.id)
-
-      GoogleEventCreator.perform_async(google_event.id)
+      google_events.create(google_calendar_id: google_calendar.id)
 
       true
     else
@@ -120,22 +119,38 @@ class EventRegistration
     if valid?
       save_event
 
+      registrant.outbound_event_configs_for(google_calendar)
+        .each do |outbound_event_config|
+
+        OutboundEventProcessing.execute(
+          outbound_event_config,
+          event
+        )
+      end
+
       if calendar_changed?
-
         destroy_all_google_events_with_previous_calendar_name
+      end
 
-        process_outbound_events_for_new_calendar
+      return unless GoogleCalendarConfig.authorized_by?(registrant)
 
-        return unless GoogleCalendarConfig.authorized_by?(registrant)
+      google_event = event.
+                     google_events.
+                     by_user(registrant).
+                     by_calendar_name(google_calendar.name).
+                     first
 
-        google_events.create(google_calendar_id: google_calendar.id)
+      if google_event.present?
+        GoogleEventUpdater.perform_async(
+          event.id,
+          google_calendar.remote_id,
+          google_event.remote_id,
+          registrant.id
+        )
       else
-
-        update_outbound_events_for_new_calendar
-
-        return unless GoogleCalendarConfig.authorized_by?(registrant)
-
-        update_remote_google_event
+        event.google_events.create(
+          google_calendar_id: google_calendar.id
+        )
       end
 
       true
@@ -145,31 +160,6 @@ class EventRegistration
   end
 
   private
-
-  def update_remote_google_event
-    GoogleEventUpdater.perform_async(
-      event.id,
-      google_calendar.remote_id,
-      google_events.by_user_and_calendar_name(registrant, google_calendar.name).remote_id,
-      registrant.id
-    )
-  end
-
-  def update_outbound_events_for_new_calendar
-    registrant.outbound_event_configs_for(google_calendar)
-      .each do |outbound_event_config|
-
-      OutboundEventProcessing.new(outbound_event_config, event).update
-    end
-  end
-
-  def process_outbound_events_for_new_calendar
-    registrant.outbound_event_configs_for(google_calendar)
-      .each do |outbound_event_config|
-
-      OutboundEventProcessing.new( outbound_event_config, event).start
-    end
-  end
 
   def destroy_all_google_events_with_previous_calendar_name
     google_events.by_calendar_name(previous_calendar.name).each do |google_event|
