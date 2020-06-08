@@ -1,6 +1,6 @@
 
-@import "https://fonts.googleapis.com/icon?family=Material+Icons";
-@import "https://fonts.googleapis.com/css?family=Roboto|Roboto+Condensed&display=swap";
+@import url('https://fonts.googleapis.com/icon?family=Material+Icons');
+@import url("https://fonts.googleapis.com/css?family=Roboto|Roboto+Condensed&display=swap");
 
 /* Color Variables
  ------------------*/
@@ -71,13 +71,15 @@ $h2-fontsize: 2.92rem;
 @import "~materialize-css/sass/components/timepicker";
 
 
-
-
 /* Custom
  ---------*/
 @import './custom';
 
-
 /* Simple Calendar
 ------------------*/
-@import './simple-calendar'
+@import './simple-calendar';
+
+
+
+
+
