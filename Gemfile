@@ -32,7 +32,7 @@ gem 'devise'
 gem 'google-api-client', require: 'google/apis/calendar_v3'
 gem 'pry'
 gem "simple_calendar", "~> 2.0"
-gem 'sidekiq', '~> 5.2', '>= 5.2.7'
+gem 'sidekiq', '~> 6.4'
 gem 'sidekiq-batch'
 gem 'faker', '~> 1.6', '>= 1.6.6'
 
